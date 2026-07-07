@@ -1,6 +1,5 @@
 _pycache_/
 *.pyc
-*.pkl
 .venv/
 venv/
 .env
