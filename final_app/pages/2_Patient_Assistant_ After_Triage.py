@@ -33,13 +33,20 @@ with col1:
 
 with col2:
 
-    arrival_mode = st.selectbox(
+    arrival_options = {
+    "Private Vehicle": "private_vehicle",
+    "Walk-in": "walk_in",
+    "Ambulance": "ambulance",
+    "Referred": "referred",
+    "Police": "police"
+    }
+
+    selected = st.selectbox(
         "Arrival Mode",
-        [
-            "walk_in",
-            "ambulance"
-        ]
+        list(arrival_options.keys())
     )
+
+    arrival_mode = arrival_options[selected]
 
     chronic_illness = st.selectbox(
         "Chronic Illness",
