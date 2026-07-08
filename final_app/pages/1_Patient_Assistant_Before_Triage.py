@@ -17,18 +17,24 @@ Must be in the same folder as:
 import streamlit as st
 import plotly.graph_objects as go
 from inference_pipeline_final import DiseasePredictor
+import sys
+import os
 
-# ---------------------------------------------------------------------------
+# Navigation Setup
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from navigation import render_sidebar
+
 # Page config
-# ---------------------------------------------------------------------------
-st.set_page_config(page_title="Patient Assistant - MediAssist AI", page_icon="🩺", layout="centered")
+st.set_page_config(
+    page_title="Patient Assistant Before Triage", 
+    page_icon="🩺", 
+    layout="wide"
+)
+render_sidebar(1)
 
-
-# ---------------------------------------------------------------------------
 # Load the predictor once and cache it (avoids reloading the model on every
 # click/interaction - Streamlit reruns the whole script top-to-bottom
 # every time a widget changes)
-# ---------------------------------------------------------------------------
 @st.cache_resource
 def load_predictor():
     return DiseasePredictor()
@@ -37,22 +43,18 @@ def load_predictor():
 predictor = load_predictor()
 symptom_options = predictor.get_symptom_list()
 
-# ---------------------------------------------------------------------------
 # Header
-# ---------------------------------------------------------------------------
-st.title("🏥 Patient Assistant")
-st.caption("Select your symptoms below to get a disease prediction, "
-           "recommended specialist, and explanation.")
-
-# ---------------------------------------------------------------------------
+st.title("🏥 Patient Assistant Before Triage")
+st.caption("Clinical Decision Support Before Triage Assessment")
+st.divider()
+st.subheader("Patient Symptoms")
 # Symptom input
-# ---------------------------------------------------------------------------
 selected_symptoms = st.multiselect(
     "Select your symptoms",
     options=symptom_options,
     placeholder="Start typing a symptom...",
 )
-
+st.divider()
 predict_clicked = st.button("Predict", type="primary", disabled=len(selected_symptoms) == 0)
 
 # ---------------------------------------------------------------------------
@@ -66,9 +68,8 @@ if predict_clicked:
     else:
         top = result["top_predictions"][0]
 
-        st.divider()
-
         # --- Main prediction ---
+        st.divider()
         st.subheader(f"Predicted Disease: {top['disease']}")
         st.metric("Confidence", f"{top['confidence']}%")
 

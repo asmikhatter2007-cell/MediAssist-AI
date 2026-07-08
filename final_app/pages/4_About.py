@@ -6,8 +6,16 @@ and team credits - correctly scoped as a group project.
 """
 
 import streamlit as st
+import sys
+import os
 
-st.set_page_config(page_title="About - MediAssist AI", page_icon="📋", layout="centered")
+# Navigation Setup
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from navigation import render_sidebar
+
+st.set_page_config(page_title="About - MediAssist AI", page_icon="📋", layout="wide")
+
+render_sidebar(4) 
 
 st.title("📋 About This Project")
 

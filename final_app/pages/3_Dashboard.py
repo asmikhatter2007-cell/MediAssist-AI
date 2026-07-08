@@ -1,6 +1,13 @@
 import streamlit as st
+import sys
+import os
 
-st.set_page_config(page_title="Dashboard", page_icon="📊")
+# Navigation Setup
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from navigation import render_sidebar
+
+st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
+render_sidebar(3) # Index 3 for Dashboard
 
 st.title("📊 Emergency Department Dashboard")
 

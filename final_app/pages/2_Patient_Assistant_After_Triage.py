@@ -1,13 +1,21 @@
 import streamlit as st
+import sys
+import os
+
+# Navigation Setup
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from navigation import render_sidebar
 
 st.set_page_config(
-    page_title="After Triage",
+    page_title="Patient Assistant After Triage",
     page_icon="🚑",
     layout="wide"
 )
 
-st.title("🚑 After Triage")
-st.caption("Clinical Decision Support after Triage Assessment")
+render_sidebar(2)
+
+st.title("🚑 Patient Assistant After Triage")
+st.caption("Clinical Decision Support After Triage Assessment")
 
 st.divider()
 
