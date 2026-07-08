@@ -21,7 +21,7 @@ from inference_pipeline_final import DiseasePredictor
 # ---------------------------------------------------------------------------
 # Page config
 # ---------------------------------------------------------------------------
-st.set_page_config(page_title="Disease Prediction Assistant", page_icon="🏥", layout="centered")
+st.set_page_config(page_title="Patient Assistant - MediAssist AI", page_icon="🩺", layout="centered")
 
 
 # ---------------------------------------------------------------------------
