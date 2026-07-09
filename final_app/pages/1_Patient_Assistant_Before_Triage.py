@@ -1,6 +1,6 @@
 import streamlit as st
+import requests
 import plotly.graph_objects as go
-from inference_pipeline_final import DiseasePredictor
 import sys
 import os
 
@@ -96,12 +96,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.caption("Clinical Decision Support Before Triage Assessment")
 
-@st.cache_resource
-def load_predictor():
-    return DiseasePredictor()
+BASE_URL = "http://127.0.0.1:8000"
 
-predictor = load_predictor()
-symptom_options = predictor.get_symptom_list()
+# Fetch the valid symptom list from the backend instead of loading the model locally
+@st.cache_data
+def load_symptom_options():
+    response = requests.get(f"{BASE_URL}/valid_symptoms")
+    response.raise_for_status()
+    return response.json()["symptoms"]
+
+try:
+    symptom_options = load_symptom_options()
+except Exception:
+    symptom_options = []
+    st.error("Backend is not running.")
 
 with st.container(border=True):
     st.subheader("📋 Patient Symptoms")
@@ -116,7 +124,15 @@ st.write("")
 predict_clicked = st.button("Predict", type="primary", disabled=len(selected_symptoms) == 0)
 
 if predict_clicked:
-    result = predictor.predict(selected_symptoms)
+    try:
+        response = requests.post(
+            f"{BASE_URL}/predict_disease",
+            json={"symptoms": selected_symptoms, "top_n": 3}
+        )
+        response.raise_for_status()
+        result = response.json()
+    except Exception:
+        result = {"error": "Backend is not running or returned an error."}
 
     if "error" in result:
         st.error(result["error"])
