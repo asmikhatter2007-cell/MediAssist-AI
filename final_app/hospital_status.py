@@ -116,17 +116,17 @@ def admission_risk(data: AdmissionInput):
     if data.chronic_illness == 1:
         risk_score += 1
 
+    if data.triage_category == "emergency":
+        risk_score += 3
+
     if data.triage_category == "very_urgent":
         risk_score += 2
 
     elif data.triage_category == "urgent":
         risk_score += 1
 
-    if data.hospital_status == "Overwhelmed":
+    if data.hospital_status in ["Overcrowded", "Overwhelmed"]:
         risk_score += 1
-
-    elif data.hospital_status == "Overcrowded":
-        risk_score += 0.5
 
     if data.bed_available < 10:
         risk_score += 1
@@ -136,18 +136,19 @@ def admission_risk(data: AdmissionInput):
 
     if risk_score <= 2:
         risk = "🟢 Low"
-        recommendation = "Likely suitable for discharge after evaluation."
+        recommendation = "Likely suitable for discharge after physician evaluation."
 
     elif risk_score <= 4:
         risk = "🟡 Moderate"
-        recommendation = recommendation = "Observation recommended. Patient may require admission based on clinical assessment."
+        recommendation = "Observation recommended. Patient may require admission based on clinical assessment."
 
     else:
         risk = "🔴 High"
-        recommendation = recommendation = "Consider early admission and immediate physician review."
+        recommendation = "Consider early admission and immediate physician review."
 
     return {
     "risk_score": risk_score,
+    "max_score": 8,
     "admission_risk": risk,
     "recommendation": recommendation
 }
