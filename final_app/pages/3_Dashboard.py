@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 import sys
 import os
 
@@ -12,6 +13,20 @@ render_sidebar(3) # Index 3 for Dashboard
 st.title("📊 Emergency Department Dashboard")
 
 st.caption("Hospital Analytics")
+
+status = "Busy"
+
+if status == "Normal":
+    st.success("🟢 Normal")
+
+elif status == "Busy":
+    st.warning("🟠 Busy")
+
+else:
+    st.error("🔴 Critical")
+
+
+st.success("🟢 Normal")
 
 st.divider()
 
@@ -51,4 +66,10 @@ st.divider()
 
 st.subheader("Analytics")
 
-st.info("Interactive graphs will appear here after integration.")
+st.info("📈 Wait Time Trend")
+
+st.info("📊 Peak Hours")
+
+st.info("📅 Busy Days")
+
+st.info("🚑 Chief Complaint Distribution")
