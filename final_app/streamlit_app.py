@@ -1,4 +1,5 @@
 import streamlit as st
+from navigation import render_sidebar
 
 # ---------------- PAGE SETTINGS ----------------
 st.set_page_config(
@@ -6,32 +7,11 @@ st.set_page_config(
     page_icon="🏥",
     layout="wide",
 )
+# Render the sidebar for Home (Index 0)
+render_sidebar(0)
 
-with st.sidebar:
-
-    st.image(
-        "https://cdn-icons-png.flaticon.com/512/2967/2967350.png",
-        width=80
-    )
-
-    st.title("MediAssist AI")
-
-    st.markdown("---")
-
-    st.markdown("### Navigation")
-
-    st.write("🏠 Home")
-    st.write("🩺 Before Triage")
-    st.write("🚑 After Triage")
-    st.write("📊 Dashboard")
-
-    st.markdown("---")
-
-    st.info(
-        "Select a module from the Pages section below."
-    )
-
-# ---------------- HERO SECTION ----------------
+# ---------------- HERO SECTION----------------
+# The rest of your code runs normally only when "🏠 Home" is selected
 st.markdown("""
 <h1 style='text-align:center; color:#0E4C92; font-size:52px;'>
 🏥 MediAssist AI
