@@ -259,7 +259,7 @@ if predict:
             "labs_ordered": LABS_ORDERED, "imaging_ordered": IMAGING_ORDERED
         }
         try:
-            response = requests.post("http://127.0.0.1:8001/predict_waittime", json=payload)
+            response = requests.post("http://127.0.0.1:8000/predict_waittime", json=payload)
             wait_time = response.json()["estimated_wait_time"]
 
             doctor_payload = payload.copy()
@@ -267,7 +267,7 @@ if predict:
             doctor_payload["triage_category"] = triage_category
             doctor_payload["wait_triage_min"] = wait_time
 
-            response = requests.post("http://127.0.0.1:8001/predict_doctor_wait", json=doctor_payload)
+            response = requests.post("http://127.0.0.1:8000/predict_doctor_wait", json=doctor_payload)
             doctor_wait = response.json()["estimated_doctor_wait"]
 
             if wait_time < 20: crowd_level = "🟢 Low"
@@ -318,7 +318,7 @@ if predict:
             "bed_available": BED_AVAILABLE, "ed_overcrowded": ED_OVERCROWDED
         }
         try:
-            response = requests.post("http://127.0.0.1:8001/admission_risk", json=risk_payload)
+            response = requests.post("http://127.0.0.1:8000/admission_risk", json=risk_payload)
             risk_result = response.json()
             risk_score = risk_result["risk_score"]
             max_score = risk_result["max_score"]
