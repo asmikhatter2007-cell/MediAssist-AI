@@ -27,6 +27,8 @@ from pydantic import BaseModel, Field
 from typing import List, Literal
 import joblib
 import pandas as pd
+import json
+import os
 from datetime import datetime
 
 from inference_pipeline_final import DiseasePredictor
@@ -59,8 +61,6 @@ hospital_status_columns = joblib.load("models/hospital_status_columns.pkl")
 wait_time_model = joblib.load("models/wait_time_model.pkl")
 wait_doctor_model = joblib.load("models/wait_doctor_model.pkl")
 
-hospital_data=None
-
 
 # ---------------------------------------------------------------------------
 # Single health check for the whole API
@@ -77,6 +77,8 @@ def home():
             "/admission_risk",
             "/predict_waittime",
             "/predict_doctor_wait",
+            "/admin/update_hospital_data",
+            "/admin/hospital_data",
         ],
     }
 
@@ -316,30 +318,105 @@ def predict_doctor_wait(data: DoctorWaitRequest):
     prediction = max(0, prediction)
     return {"estimated_doctor_wait": round(prediction, 2)}
 
+
+# ===========================================================================
+# ADMIN INPUTS - manually entered hospital-wide numbers, used by the
+# staff Dashboard. Saved to a JSON file so the data survives server
+# restarts and is shared across everyone hitting this backend.
+# ===========================================================================
+ADMIN_DATA_FILE = "data/hospital_admin_data.json"
+
+
+class AdminInput(BaseModel):
+    beds_available: int
+    total_doctors: int
+    current_patients_ed: int
+    total_nurses: int
+    pending_lab_orders: int
+    pending_imaging_orders: int
+    patients_boarding_ed: int
+    avg_boarding_hours: float
+
+
+def _get_time_of_day_bucket() -> str:
+    """Matches the morning/evening/night buckets the hospital_status
+    model was trained on (see predict_hospital_status above)."""
+    hour = datetime.now().hour
+    if 8 <= hour < 12:
+        return "morning"
+    elif 18 <= hour < 24:
+        return "evening"
+    elif 0 <= hour < 8:
+        return "night"
+    return "afternoon"  # 12-18, not one-hot encoded (baseline category)
+
+
+def _get_day_of_week_bucket() -> str:
+    return "weekend" if datetime.now().weekday() >= 5 else "weekday"
+
+
 @app.post("/admin/update_hospital_data")
-def update_hospital_data(data: dict):
-    global hospital_data
+def update_hospital_data(data: AdminInput):
+    """Admin submits the manual hospital-wide numbers. Overwrites the
+    previous snapshot - we only ever keep the latest one."""
+    os.makedirs(os.path.dirname(ADMIN_DATA_FILE), exist_ok=True)
 
-    hospital_data = data
-    hospital_data["last_updated"] = datetime.now().strftime("%d %b %Y • %I:%M %p")
+    record = data.model_dump()
+    record["last_updated"] = datetime.now().strftime("%d %b %Y, %I:%M %p")
 
-    return {"message": "Updated successfully"}
+    with open(ADMIN_DATA_FILE, "w") as f:
+        json.dump(record, f, indent=2)
+
+    return {"message": "Hospital data updated successfully.", "data": record}
+
 
 @app.get("/admin/hospital_data")
 def get_hospital_data():
-    global hospital_data
-
-    if hospital_data is None:
+    """Dashboard calls this to fetch the latest admin-entered numbers,
+    plus a live hospital_status prediction computed from them."""
+    if not os.path.exists(ADMIN_DATA_FILE):
         return {
-            "has_data": False
+            "has_data": False,
+            "message": "No hospital data has been submitted by admin yet.",
         }
+
+    with open(ADMIN_DATA_FILE, "r") as f:
+        record = json.load(f)
+
+    # Derive the ratios/fields the hospital_status model actually expects
+    nurse_patient_ratio = (
+        record["current_patients_ed"] / record["total_nurses"]
+        if record["total_nurses"] > 0 else 0
+    )
+    doctor_patient_ratio = (
+        record["current_patients_ed"] / record["total_doctors"]
+        if record["total_doctors"] > 0 else 0
+    )
+
+    # NOTE: wait_doctor_min and arrival_mode aren't hospital-wide numbers -
+    # they were originally per-patient fields. We use a neutral default
+    # here since this call isn't tied to any specific patient.
+    hospital_input = HospitalInput(
+        bed_available=record["beds_available"],
+        nurse_patient_ratio=round(nurse_patient_ratio, 2),
+        doctor_patient_ratio=round(doctor_patient_ratio, 2),
+        boarding_in_ed=record["patients_boarding_ed"],
+        boarding_hrs=record["avg_boarding_hours"],
+        labs_ordered=record["pending_lab_orders"],
+        imaging_ordered=record["pending_imaging_orders"],
+        wait_doctor_min=0,
+        arrival_mode="walk_in",
+        time_of_day=_get_time_of_day_bucket(),
+        day_of_week=_get_day_of_week_bucket(),
+    )
+    status_result = predict_hospital_status(hospital_input)
 
     return {
         "has_data": True,
-        "admin_data": hospital_data,
-        "predicted_status": "Functional",
-        "predicted_status_message": "Hospital resources are operating normally."
-    }        
+        "admin_data": record,
+        "predicted_status": status_result["hospital_status"],
+        "predicted_status_message": status_result["message"],
+    }
 
 
 if __name__ == "__main__":
