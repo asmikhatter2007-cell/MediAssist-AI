@@ -76,13 +76,18 @@ div[data-baseweb="select"] div {
     color: #ffffff !important;
 }
 
+/* ================= MATCHED BUTTON OVERRIDES ================= */
 .stButton>button{
     width:100%; border-radius:16px; height:58px;
     background: linear-gradient(90deg, #2DD4BF 0%, #818CF8 50%, #F472B6 100%);
     background-size: 200% auto; color:#0C1024; font-size:19px; font-weight:800; border:none;
     box-shadow: 0 14px 34px rgba(129,140,248,0.30); transition: all 0.25s ease;
 }
-.stButton>button:hover{ background-position: right center; transform: translateY(-2px); }
+.stButton>button:hover{ 
+    background-position: right center; 
+    transform: translateY(-2px); 
+    box-shadow: 0 18px 42px rgba(244,114,182,0.35) !important;
+}
 .stButton>button p{ color:#0C1024 !important; font-weight:800 !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -121,7 +126,8 @@ with st.container(border=True):
     )
 
 st.write("")
-predict_clicked = st.button("Predict", type="primary", disabled=len(selected_symptoms) == 0)
+# FIXED: Added use_container_width=True here to stretch across the UI cards
+predict_clicked = st.button("Predict", type="primary", disabled=len(selected_symptoms) == 0, use_container_width=True)
 
 if predict_clicked:
     try:

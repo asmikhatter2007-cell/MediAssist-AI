@@ -3,109 +3,128 @@ import streamlit as st
 def render_sidebar(current_page_index):
     # Cross-theme resilient CSS supporting both high-contrast light and dark views
     # Systemic Premium Style Overrides
-    st.markdown(
-        """
-        <style>
-        /* ================= 1. SIDEBAR FIXED LOCK ================= */
-        /* This forces the sidebar panel to maintain a consistent dark-theme look across ALL pages */
-        section[data-testid="stSidebar"], 
-        [data-testid="stSidebar"][aria-expanded="true"] {
-            min-width: 350px !important;
-            max-width: 350px !important;
-            background: #0D1226 !important; /* Forces it to stay uniform */
-            border-right: 1px solid rgba(255,255,255,0.07) !important;
-        }
-        
-        div[data-testid="stSidebarUserContent"] {
-            padding-top: 2.5rem !important;
-        }
-        
-        [data-testid="stSidebarNav"] {
-            display: none;
-        }
-        
-        /* Custom Navigation Menu Tabs Layout */
-        div[data-testid="stRadio"] > div[role="radiogroup"] {
-            gap: 12px;
-        }
-        
-        div[data-testid="stRadio"] [data-testid="stRadioDot"],
-        div[data-testid="stRadio"] label div[dir="ltr"] {
-            display: none !important;
-        }
-        
-        div[data-testid="stRadio"] > div[role="radiogroup"] > label {
-            padding: 14px 18px !important;
-            border-radius: 12px !important;
-            cursor: pointer;
-            transition: all 0.25s ease-in-out;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            background-color: rgba(255, 255, 255, 0.04) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover {
-            transform: translateX(4px);
-            background-color: rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        div[data-testid="stRadio"] > div[role="radiogroup"] > label p {
-            font-size: 15px !important;
-            font-weight: 500 !important;
-            margin: 0 !important;
-            color: #f8f9fa !important; /* Crisp white menu options */
-        }
-        
-        div[data-testid="stRadio"] > div[role="radiogroup"] > label[aria-checked="true"] {
-            background-color: #0E4C92 !important;
-            border-color: #0c4380 !important;
-            box-shadow: 0 4px 12px rgba(14, 76, 146, 0.3);
-        }
-        
-        div[data-testid="stRadio"] > div[role="radiogroup"] > label[aria-checked="true"] p {
-            color: #ffffff !important;
-            font-weight: 600 !important;
-        }
+    st.markdown("""
+<style>
 
-        /* ================= 2. METRIC TEXT VISIBILITY FIX ================= */
-        /* This forces the labels of st.metric to be bright white, and the numbers to pop */
-        div[data-testid="stMetricLabel"] p {
-            color: #EDEFFC !important;
-            font-weight: 700 !important;
-            font-size: 15px !important;
-        }
-        
-        div[data-testid="stMetricValue"] div {
-            color: #2DD4BF !important; /* Bright premium teal for the numeric data */
-            font-weight: 800 !important;
-            font-size: 2rem !important;
-        }
+/* ================= SIDEBAR ================= */
 
-        /* ================= 3. SIDEBAR COLLAPSE ARROW VISIBILITY ================= */
-        /* Force color onto the svg wrapper, path attributes, and parent interactive zones */
-        span[data-testid="stIconMaterial"], 
-        .st-emotion-cache-ch5dqi e17vll9u0,
-        button[aria-label="Collapse sidebar"] svg,
-        button[aria-label="Expand sidebar"] svg,
-        [data-testid="sidebar-collapse-button"] svg {
-            color: #ffffff !important;
-            fill: #ffffff !important;
-            stroke: #ffffff !important; /* Forces outline icon sets to white */
-            opacity: 1 !important;
-        }
+section[data-testid="stSidebar"]{
+    width:330px !important;
+    background:#0D1226 !important;
+    border-right:1px solid rgba(255,255,255,.08);
+}
 
-        /* Target the internal SVG path elements specifically */
-        button[data-testid="sidebar-collapse-button"] svg *,
-        section[data-testid="stSidebarCollapseButton"] svg * {
-            stroke: #ffffff !important;
-            fill: #ffffff !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+div[data-testid="stSidebarUserContent"]{
+    padding-top:2rem !important;
+}
+
+[data-testid="stSidebarNav"]{
+    display:none;
+}
+
+/* Hide radio dots */
+
+div[data-testid="stRadio"] [data-testid="stRadioDot"]{
+    display:none !important;
+}
+
+div[data-testid="stRadio"] label div[dir="ltr"] > div:first-child{
+    display:none !important;
+}
+
+/* Navigation cards */
+
+div[data-testid="stRadio"] > div[role="radiogroup"]{
+    gap:12px;
+}
+
+div[data-testid="stRadio"] > div[role="radiogroup"] > label{
+
+    width:100%;
+    padding:14px 18px !important;
+
+    border-radius:14px !important;
+
+    background:rgba(255,255,255,.05) !important;
+
+    border:1px solid rgba(255,255,255,.08) !important;
+
+    transition:.25s;
+
+}
+
+div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover{
+
+    background:rgba(255,255,255,.08) !important;
+
+    transform:translateX(5px);
+
+}
+
+div[data-testid="stRadio"] > div[role="radiogroup"] > label[aria-checked="true"]{
+
+    background:linear-gradient(135deg,#2563EB,#1D4ED8) !important;
+
+    border-color:#2563EB !important;
+
+}
+
+div[data-testid="stRadio"] p{
+
+    color:white !important;
+
+    font-size:15px !important;
+
+    font-weight:600 !important;
+
+}
+
+/* Sidebar collapse arrow */
+
+[data-testid="stSidebarCollapseButton"]{
+
+    color:white !important;
+
+}
+
+[data-testid="stSidebarCollapseButton"] svg{
+
+    fill:white !important;
+
+    stroke:white !important;
+
+}
+
+/* Metric visibility */
+
+div[data-testid="stMetricLabel"] p{
+
+    color:white !important;
+
+}
+
+div[data-testid="stMetricValue"]{
+
+    color:#2DD4BF !important;
+
+}
+
+/* Prevent weird shifting */
+
+[data-testid="stAppViewContainer"]{
+
+    overflow-x:hidden;
+
+}
+
+main{
+
+    transition:margin-left .25s ease;
+
+}
+
+</style>
+""", unsafe_allow_html=True)
 
     with st.sidebar:
         # Centered logo and custom header text layout

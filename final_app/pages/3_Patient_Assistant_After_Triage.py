@@ -10,14 +10,14 @@ from navigation import render_sidebar
 
 st.set_page_config(
     page_title="Patient Assistant After Triage",
-    page_icon="🚑",
+    page_icon="ROOM",
     layout="wide"
 )
-
 render_sidebar(3)
 
 now = datetime.now()
 
+# Shared Environment Parameters Defaults
 NURSE_PATIENT_RATIO = 6
 DOCTOR_PATIENT_RATIO = 12
 BED_AVAILABLE = 1
@@ -34,11 +34,8 @@ header[data-testid="stHeader"]{
     background-image: none !important;
 }
 [data-testid="stToolbar"]{ background: transparent !important; }
-html, body{
-    background: #0C1024 !important;
-}
+html, body{ background: #0C1024 !important; }
 
-/* ================= BACKGROUND — softer, "soothing" aurora on midnight slate ================= */
 .stApp{
     background:
         radial-gradient(circle at 10% 5%, rgba(129,140,248,0.16), transparent 40%),
@@ -50,7 +47,6 @@ html, body{
 }
 .block-container{ padding-top: 4.5rem !important; max-width: 1200px; }
 
-/* ================= TITLE EMOJI MASK FIX ================= */
 .title-container {
     display: flex;
     align-items: center;
@@ -70,10 +66,9 @@ html, body{
     font-size:2.5rem !important;
 }
 
-h2, h3{ color:#EDEFFC !important; font-weight:700 !important; }
+h2, h3, h4{ color:#EDEFFC !important; font-weight:700 !important; }
 [data-testid="stCaptionContainer"]{ color:#9BA3C7 !important; font-size:15px !important; }
 
-/* ================= SECTION CARDS ================= */
 div[data-testid="stVerticalBlockBorderWrapper"]{
     background: rgba(255,255,255,0.04) !important;
     backdrop-filter: blur(18px);
@@ -83,14 +78,12 @@ div[data-testid="stVerticalBlockBorderWrapper"]{
     box-shadow: 0 20px 50px rgba(0,0,0,0.35);
 }
 
-/* ================= LABELS ================= */
 .stSelectbox label p, .stSlider label p, .stRadio label p, [data-testid="stWidgetLabel"] p{
     color:#C3CAE8 !important;
     font-weight:700 !important;
     font-size:14.5px !important;
 }
 
-/* ================= SELECT BOX ================= */
 div[data-baseweb="select"]{
     background: rgba(255,255,255,0.06) !important;
     border-radius:12px !important;
@@ -105,47 +98,26 @@ div[data-baseweb="select"] div{
     background: transparent !important;
     color:#EEF1FB !important;
 }
-div[data-baseweb="select"] input{
-    color:#EEF1FB !important;
-}
+div[data-baseweb="select"] input{ color:#EEF1FB !important; }
 div[data-baseweb="select"] svg{ fill:#2DD4BF !important; }
 
-/* Dropdown menu */
-ul[data-baseweb="menu"], div[data-baseweb="popover"] ul, div[data-baseweb="popover"] div[role="listbox"]{
-    background:#141A33 !important;
+/* PREMIUM DROPDOWN HOVER STYLING UPGRADES */
+div[data-baseweb="popover"] {
+    background-color: #0E132B !important;
 }
-ul[data-baseweb="menu"] li, li[data-baseweb="menu-item"], div[role="listbox"] div{
-    background:#141A33 !important;
-    color:#EEF1FB !important;
+div[data-baseweb="popover"] ul {
+    background-color: #0E132B !important;
 }
-li[data-baseweb="menu-item"]:hover, li[aria-selected="true"], div[role="option"]:hover{
-    background: rgba(45,212,191,0.16) !important;
-    color:#2DD4BF !important;
+div[data-baseweb="popover"] li {
+    background-color: #0E132B !important;
+    color: #EEF1FB !important;
+    transition: all 0.2s ease;
+}
+div[data-baseweb="popover"] li:hover {
+    background-color: #818CF8 !important;
+    color: #ffffff !important;
 }
 
-/* ================= SLIDER ================= */
-.stSlider [data-baseweb="slider"] > div > div{ background: rgba(255,255,255,0.12) !important; }
-.stSlider [data-baseweb="slider"] div[role="slider"]{
-    background-color:#F472B6 !important;
-    box-shadow:0 0 0 6px rgba(244,114,182,0.20) !important;
-    border: 2px solid #ffffff !important;
-}
-.stSlider [data-baseweb="slider"] > div > div > div{
-    background: linear-gradient(90deg, #2DD4BF, #818CF8) !important;
-}
-[data-testid="stTickBar"] p, [data-testid="stThumbValue"]{ color:#EEF1FB !important; font-weight:700 !important; }
-[data-testid="stThumbValue"]{ background:#F472B6 !important; border-radius:8px !important; padding:2px 8px !important; }
-
-/* ================= RADIO (Clean Streamlit Default) ================= */
-div[role="radiogroup"]{ gap:12px; }
-div[role="radiogroup"] label{
-    background:transparent !important; border:none !important; box-shadow:none !important; padding:2px 0 !important;
-}
-div[role="radiogroup"] label p{ color:#E5E7EB !important; font-weight:600 !important; }
-input[type="radio"]:checked{ accent-color:#22C55E !important; }
-input[type="radio"]{ filter:hue-rotate(90deg); }
-
-/* ================= BUTTON ================= */
 .stButton>button{
     width:100%; border-radius:16px; height:58px;
     background: linear-gradient(90deg, #2DD4BF 0%, #818CF8 50%, #F472B6 100%);
@@ -155,26 +127,10 @@ input[type="radio"]{ filter:hue-rotate(90deg); }
 .stButton>button:hover{ background-position: right center; transform: translateY(-2px); key-box-shadow: 0 18px 42px rgba(244,114,182,0.35); }
 .stButton>button p{ color:#0C1024 !important; font-weight:800 !important; }
 
-/* ================= ERROR BANNER ================= */
-div[data-testid="stAlertContentError"]{ color:#FCA5A5 !important; font-weight:700 !important; }
-
-/* ================= CUSTOM STAT CARDS ================= */
-.stat-card{
-    background: rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.10); border-radius:18px;
-    padding:16px 18px; display:flex; align-items:center; gap:14px; backdrop-filter: blur(14px);
-    box-shadow: 0 14px 34px rgba(0,0,0,0.3); margin-bottom:14px;
-}
-.stat-icon{
-    width:46px; height:46px; border-radius:13px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; font-size:20px;
-}
-.stat-label{ font-size:12px; color:#9BA3C7; margin-bottom:3px; font-weight:600; }
-.stat-val{ font-size:19px; font-weight:800; color:#EEF1FB; }
-
-/* ================= RESULT CARDS WITH RING ================= */
 .ring-card{
     background: rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.10); border-radius:20px;
     padding:22px; text-align:center; backdrop-filter: blur(16px); box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    height: 100%;
 }
 .ring{
     width:112px; height:112px; border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -186,12 +142,11 @@ div[data-testid="stAlertContentError"]{ color:#FCA5A5 !important; font-weight:70
 .ring-sub{ font-size:10px; color:#9BA3C7; }
 .result-label{ font-size:13px; color:#C3CAE8; font-weight:700; margin-top:6px; }
 
-div[role="radiogroup"] input[type="radio"]{ accent-color:#2DD4BF !important; }
-div[role="radiogroup"] svg circle, div[role="radiogroup"] svg path{ stroke:#2DD4BF !important; fill:#2DD4BF !important; }
+.info-title { font-size:12px; color:#9BA3C7; font-weight:600; margin-bottom:2px; }
+.info-value { font-size:16px; font-weight:800; margin-top:0px; }
 </style>
 """, unsafe_allow_html=True)
 
-# Custom aligned title wrapper
 st.markdown("""
 <div class="title-container">
     <span class="title-icon">🚑</span>
@@ -200,134 +155,343 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.caption("Clinical Decision Support After Triage Assessment")
 
-c1, c2, c3 = st.columns(3)
-with c1:
-    st.markdown(f"""
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(45,212,191,0.16); color:#2DD4BF;">📅</div>
-            <div><div class="stat-label">Day</div><div class="stat-val">{now.strftime('%A')}</div></div>
-        </div>
-    """, unsafe_allow_html=True)
-with c2:
-    st.markdown(f"""
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(129,140,248,0.16); color:#A5AEFA;">🕒</div>
-            <div><div class="stat-label">Time</div><div class="stat-val">{now.strftime('%I:%M %p')}</div></div>
-        </div>
-    """, unsafe_allow_html=True)
-with c3:
-    st.markdown(f"""
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(52,211,153,0.16); color:#34D399;">🏥</div>
-            <div><div class="stat-label">Emergency Department</div><div class="stat-val">Open</div></div>
-        </div>
-    """, unsafe_allow_html=True)
+BASE_URL = "http://127.0.0.1:8000"
+
+raw_admin_metrics = None
+h_status = "Functional"
+
+try:
+    response = requests.get(f"{BASE_URL}/admin/hospital_data")
+    response.raise_for_status()
+    raw_admin_data = response.json()
+except Exception:
+    raw_admin_data = None
+
+if raw_admin_data and raw_admin_data.get("has_data"):
+    raw_admin_metrics = raw_admin_data["admin_data"]
+    h_status = raw_admin_data["predicted_status"]
+    
+    beds_val = int(raw_admin_metrics["beds_available"])
+    if beds_val > 10: bed_status, bed_color = "🟢 Available", "#34D399"
+    elif beds_val > 0: bed_status, bed_color = "🟠 Limited", "#FBBF6E"
+    else: bed_status, bed_color = "🔴 Full", "#F87171"
+    
+    docs = int(raw_admin_metrics["total_doctors"])
+    nurses = int(raw_admin_metrics["total_nurses"])
+    patients = int(raw_admin_metrics["current_patients_ed"])
+    
+    DOCTOR_PATIENT_RATIO = (patients / docs) if docs > 0 else patients
+    NURSE_PATIENT_RATIO = (patients / nurses) if nurses > 0 else patients
+    
+    doc_status, doc_color = ("🟢 Available", "#34D399") if DOCTOR_PATIENT_RATIO < 4 else ("🟠 Busy", "#FBBF6E")
+    
+    if NURSE_PATIENT_RATIO < 2: nurse_status, nurse_color = "🟢 Normal Load", "#34D399"
+    elif NURSE_PATIENT_RATIO < 4: nurse_status, nurse_color = "🟠 Moderate Load", "#FBBF6E"
+    else: nurse_status, nurse_color = "🔴 High Load", "#F87171"
+    
+    last_update_str = raw_admin_data["admin_data"]["last_updated"].split("•")[-1].strip()
+    
+    BED_AVAILABLE = int(raw_admin_metrics["beds_available"])
+    ED_OVERCROWDED = 1 if h_status in ["Overcrowded", "Overwhelmed"] else 0
+    FLOOR_OR_CHAIR_CARE = 0
+    LABS_ORDERED = int(raw_admin_metrics["pending_lab_orders"])
+    IMAGING_ORDERED = int(raw_admin_metrics["pending_imaging_orders"])
+else:
+    bed_status, bed_color = "🟢 Available", "#34D399"
+    doc_status, doc_color = "🟢 Available", "#34D399"
+    nurse_status, nurse_color = "🟠 Moderate Load", "#FBBF6E"
+    last_update_str = now.strftime('%I:%M %p')
+    
+    NURSE_PATIENT_RATIO = 6
+    DOCTOR_PATIENT_RATIO = 12
+    BED_AVAILABLE = 1
+    ED_OVERCROWDED = 1
+    FLOOR_OR_CHAIR_CARE = 0
+    LABS_ORDERED = 1
+    IMAGING_ORDERED = 0
+
+status_mapping = {
+    "Functional": ("🟢 Functional", "Minimal Delay", "#34D399"),
+    "Overcrowded": ("🟠 Overcrowded", "Moderate Delay", "#FBBF6E"),
+    "Overwhelmed": ("🔴 Overwhelmed", "Significant Delay", "#F87171")
+}
+disp_status, disp_delay, status_color = status_mapping.get(h_status, ("🟢 Functional", "Minimal Delay", "#34D399"))
+
+c_a, c_b, c_c, c_d, c_e = st.columns(5)
+with c_a:
+    st.markdown(f'<div class="info-title">🏥 Hospital Status</div><div class="info-value" style="color:{status_color};">{disp_status}</div><div style="font-size:11px; color:#9BA3C7;">{disp_delay}</div>', unsafe_allow_html=True)
+with c_b:
+    st.markdown(f'<div class="info-title">🛏️ Bed Capacity</div><div class="info-value" style="color:{bed_color};">{bed_status}</div>', unsafe_allow_html=True)
+with c_c:
+    st.markdown(f'<div class="info-title">👨‍⚕️ Doctor Availability</div><div class="info-value" style="color:{doc_color};">{doc_status}</div>', unsafe_allow_html=True)
+with c_d:
+    st.markdown(f'<div class="info-title">👩‍⚕️ Nursing Capacity</div><div class="info-value" style="color:{nurse_color};">{nurse_status}</div>', unsafe_allow_html=True)
+with c_e:
+    st.markdown(f'<div class="info-title">🕒 Last Updated</div><div class="info-value" style="color:#818CF8;">{last_update_str}</div>', unsafe_allow_html=True)
+
+st.write("")
+
+arrival_clean_to_raw = {"Walk In": "walk_in", "Ambulance": "ambulance", "Referred": "referred", "Police": "police", "Private Vehicle": "private_vehicle"}
+arrival_raw_to_clean = {v: k for k, v in arrival_clean_to_raw.items()}
+
+triage_clean_to_raw = {"Non Urgent": "non_urgent", "Standard": "standard", "Urgent": "urgent", "Very Urgent": "very_urgent", "Emergency": "emergency"}
+triage_raw_to_clean = {v: k for k, v in triage_clean_to_raw.items()}
+
+complaint_clean_to_raw = {
+    "Abdominal Pain": "abdominal_pain", 
+    "Cardiovascular": "cardiovascular", 
+    "Fever Infection": "fever_infection", 
+    "Neurological": "neurological", 
+    "Obstetric Gynae": "obstetric_gynae", 
+    "Other": "other", 
+    "Poisoning": "poisoning", 
+    "Respiratory": "respiratory", 
+    "Surgical": "surgical", 
+    "Trauma": "trauma"
+}
+complaint_raw_to_clean = {v: k for k, v in complaint_clean_to_raw.items()}
 
 with st.container(border=True):
     st.subheader("👤 Patient Information")
     col1, col2 = st.columns(2)
     with col1:
-        age = st.slider("Age", min_value=0, max_value=100, value=30)
-        sex = st.selectbox("Sex", ["male", "female"])
+        st.session_state.age = st.slider("Age", min_value=0, max_value=100, value=st.session_state.get("age", 30))
+        
+        sex_opts = ["Male", "Female"]
+        sex_idx = sex_opts.index(st.session_state.get("sex", "Male"))
+        chosen_sex = st.selectbox("Sex", sex_opts, index=sex_idx)
+        st.session_state.sex = chosen_sex
     with col2:
-        arrival_mode = st.selectbox("Arrival Mode", ["walk_in", "ambulance"])
-        chronic_illness = st.selectbox("Chronic Illness", ["No", "Yes"])
+        arrival_opts = list(arrival_clean_to_raw.keys())
+        saved_raw_arr = st.session_state.get("arrival_mode", "walk_in")
+        arrival_idx = arrival_opts.index(arrival_raw_to_clean.get(saved_raw_arr, "Walk In"))
+        chosen_arrival = st.selectbox("Arrival Mode", arrival_opts, index=arrival_idx)
+        st.session_state.arrival_mode = arrival_clean_to_raw[chosen_arrival]
+        
+        ill_opts = ["No", "Yes"]
+        ill_idx = ill_opts.index(st.session_state.get("chronic_illness", "No"))
+        chosen_ill = st.selectbox("Chronic Illness", ill_opts, index=ill_idx)
+        st.session_state.chronic_illness = chosen_ill
 
 with st.container(border=True):
     st.subheader("👨🏻‍⚕️ Triage Information")
     col3, col4 = st.columns(2)
     with col3:
-        triage_category = st.selectbox("Triage Category", ["non_urgent", "standard", "urgent", "very_urgent", "emergency"])
+        triage_opts = list(triage_clean_to_raw.keys())
+        saved_raw_tri = st.session_state.get("triage_category", "standard")
+        triage_idx = triage_opts.index(triage_raw_to_clean.get(saved_raw_tri, "Standard"))
+        chosen_triage = st.selectbox("Triage Category", triage_opts, index=triage_idx)
+        st.session_state.triage_category = triage_clean_to_raw[chosen_triage]
     with col4:
-        chief_complaint = st.selectbox("Chief Complaint", ["abdominal_pain", "cardiovascular", "fever_infection", "neurological", "obstetric_gynae", "other", "poisoning", "respiratory", "surgical", "trauma"])
+        complaint_opts = list(complaint_clean_to_raw.keys())
+        saved_raw_comp = st.session_state.get("chief_complaint", "abdominal_pain")
+        complaint_idx = complaint_opts.index(complaint_raw_to_clean.get(saved_raw_comp, "Abdominal Pain"))
+        chosen_complaint = st.selectbox("Chief Complaint", complaint_opts, index=complaint_idx)
+        st.session_state.chief_complaint = complaint_clean_to_raw[chosen_complaint]
+
+st.write("")
+
+# 🚨 EMERGENCY ALERT NOTICE BOX
+st.markdown("""
+<div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 18px; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.15);">
+    <h4 style="color:#EF4444; margin: 0 0 8px 0; font-weight:800; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+        🚨 EMERGENCY ALERT NOTICE
+    </h4>
+    <p style="color:#EEF1FB; margin: 0 0 8px 0; font-size: 13.5px; font-weight: 600;">
+        If you are experiencing any of the following immediate life-threatening events:
+    </p>
+    <div style="display: flex; gap: 40px; color:#FCA5A5; font-size: 13.5px; font-weight: 700; margin-left: 10px; margin-bottom: 8px;">
+        <div>• Acute Chest Pain</div>
+        <div>• Severe Active Bleeding</div>
+        <div>• Sudden Difficulty Breathing</div>
+    </div>
+    <p style="color:#C3CAE8; margin: 0; font-size: 12.5px; font-style: italic;">
+        Please inform the nursing reception staff immediately for priority emergency care placement.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+st.write("")
+st.write("")
 
 predict = st.button("Predict", type="primary", use_container_width=True)
-
-wait_time = "__"
-doctor_wait = "__"
-crowd_level = "Waiting"
 
 if predict:
     with st.spinner("Generating predictions..."):
         now = datetime.now()
         payload = {
-            "age": age, "sex": sex, "arrival_mode": arrival_mode, "time_of_day": now.strftime("%H:%M:%S"),
-            "day_of_week": now.strftime("%A").lower(), "chief_complaint": chief_complaint,
-            "chronic_illness": 1 if chronic_illness == "Yes" else 0, "ed_overcrowded": ED_OVERCROWDED,
+            "age": st.session_state.age, 
+            "sex": st.session_state.sex.lower(), 
+            "arrival_mode": st.session_state.arrival_mode, 
+            "time_of_day": now.strftime("%H:%M:%S"),
+            "day_of_week": now.strftime("%A").lower(), 
+            "chief_complaint": st.session_state.chief_complaint,
+            "chronic_illness": 1 if st.session_state.chronic_illness == "Yes" else 0, 
+            "ed_overcrowded": ED_OVERCROWDED,
             "bed_available": BED_AVAILABLE, "floor_or_chair_care": FLOOR_OR_CHAIR_CARE,
             "nurse_patient_ratio": NURSE_PATIENT_RATIO, "doctor_patient_ratio": DOCTOR_PATIENT_RATIO,
             "labs_ordered": LABS_ORDERED, "imaging_ordered": IMAGING_ORDERED
         }
         try:
-            response = requests.post("http://127.0.0.1:8000/predict_waittime", json=payload)
+            response = requests.post(f"{BASE_URL}/predict_waittime", json=payload)
             wait_time = response.json()["estimated_wait_time"]
 
             doctor_payload = payload.copy()
             doctor_payload["triage_performed"] = 1
-            doctor_payload["triage_category"] = triage_category
+            doctor_payload["triage_category"] = st.session_state.triage_category
             doctor_payload["wait_triage_min"] = wait_time
 
-            response = requests.post("http://127.0.0.1:8000/predict_doctor_wait", json=doctor_payload)
+            response = requests.post(f"{BASE_URL}/predict_doctor_wait", json=doctor_payload)
             doctor_wait = response.json()["estimated_doctor_wait"]
 
-            if wait_time < 20: crowd_level = "🟢 Low"
-            elif wait_time < 40: crowd_level = "🟠 Moderate"
-            else: crowd_level = "🔴 High"
-        except Exception:
-            st.error("Backend is not running.")
+            if wait_time < 20:
+                raw_crowd = "Low"
+            elif wait_time < 40:
+                raw_crowd = "Moderate"
+            else:
+                raw_crowd = "High"
 
-def ring_pct(value, cap):
-    try: return max(0, min(100, (float(value) / cap) * 100))
-    except (ValueError, TypeError): return 0
+            if raw_admin_metrics:
+                hospital_status_payload = {
+                    "bed_available": int(raw_admin_metrics["beds_available"]),
+                    "nurse_patient_ratio": float(NURSE_PATIENT_RATIO),
+                    "doctor_patient_ratio": float(DOCTOR_PATIENT_RATIO),
+                    "boarding_in_ed": int(raw_admin_metrics["patients_boarding_ed"]),
+                    "boarding_hrs": float(raw_admin_metrics["avg_boarding_hours"]),
+                    "labs_ordered": int(raw_admin_metrics["pending_lab_orders"]),
+                    "imaging_ordered": int(raw_admin_metrics["pending_imaging_orders"]),
+                    "wait_doctor_min": float(doctor_wait),
+                    "arrival_mode": st.session_state.arrival_mode,
+                    "time_of_day": "morning" if (8 <= now.hour < 12) else ("evening" if (16 <= now.hour < 22) else "night"),
+                    "day_of_week": "weekend" if (now.weekday() >= 5) else "weekday"
+                }
+                status_resp = requests.post(f"{BASE_URL}/predict_hospital_status", json=hospital_status_payload)
+                hospital_status_prediction = status_resp.json()["hospital_status"]
+            else:
+                hospital_status_prediction = "Functional"
+                if wait_time >= 40: hospital_status_prediction = "Overwhelmed"
+                elif wait_time >= 20: hospital_status_prediction = "Overcrowded"
 
-wait_pct = ring_pct(wait_time, 60)
-doc_pct = ring_pct(doctor_wait, 40)
-crowd_color = {"🟢 Low": "#34D399", "🟠 Moderate": "#FBBF6E", "🔴 High": "#F87171"}.get(crowd_level, "#818CF8")
-crowd_pct = {"🟢 Low": 33, "🟠 Moderate": 66, "🔴 High": 100}.get(crowd_level, 0)
+            # --- Change 2: Updated Hospital Status Crowd Logic ---
+            if doctor_wait < 45 and hospital_status_prediction == "Functional":
+                crowd_level = "🟢 Low"
+            elif doctor_wait >= 70 or hospital_status_prediction == "Overwhelmed":
+                crowd_level = "🔴 High"
+            else:
+                crowd_level = "🟠 Moderate"
 
-if predict:
-    with st.container(border=True):
-        st.subheader("📊 Prediction Results")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown(f"""
-            <div class="ring-card">
-                <div class="ring" style="background:conic-gradient(#818CF8 0% {doc_pct}%, rgba(255,255,255,0.08) {doc_pct}% 100%);">
-                    <div class="ring-inner"><div class="ring-num">{doctor_wait}</div><div class="ring-sub">min</div></div>
+            # --- DYNAMIC 10-POINT ACCUMULATION SCORE ALGORITHM ---
+            risk_score = 0
+            if st.session_state.age >= 65:
+                risk_score += 1
+            if st.session_state.chronic_illness == "Yes":
+                risk_score += 1
+            
+            if st.session_state.arrival_mode == "ambulance":
+                risk_score += 2
+                
+            # FIXED: Added logical 'or' condition to ensure both emergency and very_urgent catch the full 2 points
+            if st.session_state.triage_category == "very_urgent" or st.session_state.triage_category == "emergency":
+                risk_score += 2
+            elif st.session_state.triage_category == "urgent":
+                risk_score += 1
+            if hospital_status_prediction == "Overwhelmed":
+                risk_score += 2
+            elif hospital_status_prediction == "Overcrowded":
+                risk_score += 1
+            if BED_AVAILABLE < 10:
+                risk_score += 1
+            if ED_OVERCROWDED == 1:
+                risk_score += 1
+
+            if risk_score >= 6:
+                risk_label = "🔴 High"
+                recommendation = "Consider early clinical admission pathway placement and immediate attending physician oversight review."
+            elif risk_score >= 3.5:
+                risk_label = "🟡 Moderate"
+                recommendation = "Observation tracking highly recommended. Patient parameters suggest high load likelihood for active board setup."
+            else:
+                risk_label = "🟢 Low"
+                recommendation = "Likely suitable for safe discharge options pending standard physician clearing summary workflows."
+
+            def ring_pct(value, cap):
+                try: return max(0, min(100, (float(value) / cap) * 100))
+                except (ValueError, TypeError): return 0
+
+            doc_pct = ring_pct(doctor_wait, 80)
+            
+            crowd_color = {"🟢 Low": "#34D399", "🟠 Moderate": "#FBBF6E", "🔴 High": "#F87171"}.get(crowd_level, "#818CF8")
+            crowd_pct = {"🟢 Low": 33, "🟠 Moderate": 66, "🔴 High": 100}.get(crowd_level, 0)
+            
+            risk_color = {"🟢 Low": "#34D399", "🟡 Moderate": "#FBBF6E", "🔴 High": "#F87171"}.get(risk_label, "#818CF8")
+            risk_pct = (risk_score / 10.0) * 100
+
+            with st.container(border=True):
+                st.subheader("📊 Prediction Results")
+                st.columns(3)
+                c1, c2, c3 = st.columns(3)
+                
+                with c1:
+                    st.markdown(f"""
+                    <div class="ring-card">
+                        <div class="ring" style="background:conic-gradient(#818CF8 0% {doc_pct}%, rgba(255,255,255,0.08) {doc_pct}% 100%);">
+                            <div class="ring-inner"><div class="ring-num">{doctor_wait}</div><div class="ring-sub">min</div></div>
+                        </div>
+                        <div class="result-label">👨‍⚕️ Doctor Wait</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                with c2:
+                    st.markdown(f"""
+                    <div class="ring-card">
+                        <div class="ring" style="background:conic-gradient({crowd_color} 0% {crowd_pct}%, rgba(255,255,255,0.08) {crowd_pct}% 100%);">
+                            <div class="ring-inner"><div class="ring-num" style="font-size:15px;">{crowd_level.split(' ')[-1]}</div></div>
+                        </div>
+                        <div class="result-label">📈 Crowd Level</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                # --- Change 1: Updated with c3 layout alignment ---
+                with c3:
+                    st.markdown(f"""
+                    <div class="ring-card">
+                        <div class="ring" style="background:conic-gradient({risk_color} 0% {risk_pct}%, rgba(255,255,255,0.08) {risk_pct}% 100%);">
+                            <div class="ring-inner"><div class="ring-num">{int(risk_score) if risk_score % 1 == 0 else risk_score}/10</div><div class="ring-sub">Score</div></div>
+                        </div>
+                        <div class="result-label">🚨 Admission Likelihood</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                # Clinical Assessment Card
+                st.markdown(f"""
+                <div style="background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.10); border-radius: 18px; padding: 20px; backdrop-filter: blur(14px); box-shadow: 0 14px 34px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 20px;">
+                    <div style="font-size: 2.3rem; flex-shrink: 0;">🏥</div>
+                    <div>
+                        <h4 style="color:{risk_color}; margin: 0 0 6px 0; font-weight:700; font-size: 19px; display: flex; align-items: center; gap: 8px;">
+                            Clinical Assessment: {risk_label} Admission Likelihood
+                        </h4>
+                        <p style="color:#C3CAE8; margin: 0; font-size: 14.5px; line-height: 1.5;">{recommendation}</p>
+                    </div>
                 </div>
-                <div class="result-label">👨‍⚕️ Doctor Wait</div>
-            </div>
-        """, unsafe_allow_html=True)
-        with c2:
-            st.markdown(f"""
-            <div class="ring-card">
-                <div class="ring" style="background:conic-gradient({crowd_color} 0% {crowd_pct}%, rgba(255,255,255,0.08) {crowd_pct}% 100%);">
-                    <div class="ring-inner"><div class="ring-num" style="font-size:15px;">{crowd_level.split(' ')[-1] if crowd_level != "Waiting" else "—"}</div></div>
+                """, unsafe_allow_html=True)
+
+                # 📋 NEXT STEP COMPONENT HIERARCHY
+                st.markdown("""
+                <br>
+                <div style="background: rgba(129, 140, 248, 0.06); border: 1px solid rgba(129, 140, 248, 0.25); border-radius: 18px; padding: 20px; backdrop-filter: blur(14px); box-shadow: 0 14px 34px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 20px;">
+                    <div style="font-size: 2.3rem; flex-shrink: 0;">📋</div>
+                    <div>
+                        <h4 style="color:#818CF8; margin: 0 0 6px 0; font-weight:700; font-size: 17px;">Next Steps for Care Progression</h4>
+                        <div style="color:#C3CAE8; font-size: 14px; line-height: 1.6; font-weight: 500;">
+                            1. Please remain seated comfortably in the triage waiting area until your name is broadcast over the loudspeaker system.<br>
+                            2. Keep your mobile communication devices nearby and active for automated placement alerts.<br>
+                            3. Ensure any physical copies of past medication prescriptions or lab records are organized and ready for primary physician intake review.
+                        </div>
+                    </div>
                 </div>
-                <div class="result-label">📈 Crowd Level</div>
-            </div>
-        """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
-        hospital_status = "Functional"
-        if crowd_level == "🟠 Moderate": hospital_status = "Overcrowded"
-        elif crowd_level == "🔴 High": hospital_status = "Overwhelmed"
-
-        risk_payload = {
-            "age": age, "chronic_illness": 1 if chronic_illness == "Yes" else 0,
-            "triage_category": triage_category, "hospital_status": hospital_status,
-            "bed_available": BED_AVAILABLE, "ed_overcrowded": ED_OVERCROWDED
-        }
-        try:
-            response = requests.post("http://127.0.0.1:8000/admission_risk", json=risk_payload)
-            risk_result = response.json()
-            risk_score = risk_result["risk_score"]
-            max_score = risk_result["max_score"]
-            risk_label = risk_result["admission_risk"]
-            recommendation = risk_result["recommendation"]
-
-            if "Low" in risk_label: risk_color = "#34D399"
-            elif "Moderate" in risk_label: risk_color = "#FBBF6E"
-            else: risk_color = "#F87171"
-            risk_pct = (risk_score / max_score) * 100
-        except Exception:
-            pass
+        except Exception as e:
+            st.error("Backend is not running or returned an error context.")
