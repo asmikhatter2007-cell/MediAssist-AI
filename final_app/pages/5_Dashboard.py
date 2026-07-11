@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import sys
 import os
+import pandas as pd
+import plotly.express as px
 
 # Navigation Setup
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -41,19 +43,23 @@ html, body{ background: #0C1024 !important; }
 }
 
 h2, h3 { color:#EDEFFC !important; font-weight:700 !important; }
-div[data-testid="stVerticalBlockBorderWrapper"]{
-    background: rgba(255,255,255,0.04) !important;
-    backdrop-filter: blur(18px);
-    border-radius:22px !important;
-    border:1px solid rgba(255,255,255,0.09) !important;
+div[class*="st-key-card_"]{
+    background: rgba(255,255,255,0.07) !important;
+    border-radius:20px !important;
+    border:1.5px solid rgba(129,140,248,0.35) !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important;
     padding:20px !important;
 }
 .status-pill { padding: 10px 20px; border-radius: 12px; font-weight: 700; display: inline-block; margin-bottom: 15px; }
 .status-functional { background: rgba(52,211,153,0.15); color: #34D399; border: 1px solid rgba(52,211,153,0.3); }
 .status-busy { background: rgba(251,191,110,0.15); color: #FBBF6E; border: 1px solid rgba(251,191,110,0.3); }
 .status-overwhelmed { background: rgba(248,113,113,0.15); color: #F87171; border: 1px solid rgba(248,113,113,0.3); }
-.metric-header { font-size: 14.5px; font-weight: 600; color: #9BA3C7; margin-bottom: 2px; }
-.metric-value { font-size: 34px; font-weight: 800; color: #2DD4BF; margin-top: 0px; }
+
+.metric-card { display:flex; align-items:center; gap:14px; padding:16px 18px; }
+.metric-icon { width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
+.metric-header { font-size: 13px; font-weight: 600; color: #9BA3C7; margin-bottom: 3px; }
+.metric-value { font-size: 26px; font-weight: 800; color: #EEF1FB; }
+
 .stButton>button{
     width:100%; border-radius:16px; height:52px;
     background: linear-gradient(90deg, #2DD4BF 0%, #818CF8 50%, #F472B6 100%);
@@ -95,6 +101,70 @@ with col_b:
         st.session_state.staff_authenticated = False
         st.rerun()
 
+
+# ---------------- CARD HELPERS ----------------
+
+def metric_card(icon, label, value, color):
+    # Kept as a single-line string on purpose — multi-line indented f-strings
+    # get misread as Markdown code blocks and render as raw tags.
+    return f'<div class="metric-card"><div class="metric-icon" style="background:{color}26;color:{color};">{icon}</div><div><div class="metric-header">{label}</div><div class="metric-value">{value}</div></div></div>'
+
+
+def styled_bar(df, x_col, y_col, color_map, title):
+    fig = px.bar(
+        df, x=y_col, y=x_col, orientation="h",
+        color=x_col, color_discrete_map=color_map, text=y_col
+    )
+    max_val = df[y_col].max()
+    fig.update_traces(
+        textposition="outside",
+        textfont=dict(size=15, color="#EEF1FB", family="Inter"),
+        marker_line_width=0, width=0.5
+    )
+    fig.update_layout(
+        title=dict(text=title, font=dict(size=16, color="#EDEFFC")),
+        height=280, showlegend=False,
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#C3CAE8", family="Inter"),
+        xaxis=dict(showgrid=False, showticklabels=False, zeroline=False, title=None,
+                   range=[0, max_val * 1.35]),
+        yaxis=dict(showgrid=False, title=None, tickfont=dict(size=13, color="#EEF1FB"),
+                   automargin=True),
+        margin=dict(l=10, r=20, t=45, b=10)
+    )
+    return fig
+
+
+def styled_donut(df, label_col, value_col, color_map, title, key):
+    fig = px.pie(
+        df, names=label_col, values=value_col, hole=0.66,
+        color=label_col, color_discrete_map=color_map
+    )
+    fig.update_traces(
+        textinfo="none",
+        marker=dict(line=dict(color="#0C1024", width=4))
+    )
+    fig.update_layout(
+        title=dict(text=title, font=dict(size=16, color="#EDEFFC")),
+        height=220, showlegend=False,
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=10, r=10, t=45, b=10)
+    )
+
+    _, mid, _ = st.columns([1, 6, 1])
+    with mid:
+        st.plotly_chart(fig, use_container_width=True, theme=None, key=key)
+
+    rows = []
+    for label, value in zip(df[label_col], df[value_col]):
+        color = color_map[label]
+        row = f'<div style="display:flex;align-items:center;gap:8px;margin:4px 0;"><div style="width:10px;height:10px;border-radius:3px;background:{color};"></div><div style="font-size:13.5px;color:#EEF1FB;">{label}</div><div style="margin-left:auto;font-size:14px;font-weight:700;color:{color};">{value}</div></div>'
+        rows.append(row)
+
+    legend_html = f'<div style="padding:0 12px;">{"".join(rows)}</div>'
+    st.markdown(legend_html, unsafe_allow_html=True)
+
+
 # ---------------- FETCH REAL DATA FROM BACKEND ----------------
 try:
     response = requests.get(f"{BASE_URL}/admin/hospital_data")
@@ -106,6 +176,7 @@ except Exception:
 
 if data is not None and not data.get("has_data"):
     st.warning("No hospital data has been submitted by admin yet.")
+
 elif data is not None:
     admin_data = data["admin_data"]
     status = data["predicted_status"]
@@ -126,32 +197,78 @@ elif data is not None:
     st.caption(f"Last Updated: {admin_data['last_updated']}")
     st.caption(status_message)
 
+    # ---------------- METRIC CARDS (row 1) ----------------
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown('<div class="metric-header">🧑‍🤝‍🧑 Patients in ED</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{admin_data["current_patients_ed"]}</div>', unsafe_allow_html=True)
+        with st.container(border=True,key="card_patients"):
+            st.markdown(metric_card("🧑‍🤝‍🧑", "Patients in ED", admin_data["current_patients_ed"], "#2DD4BF"), unsafe_allow_html=True)
     with c2:
-        st.markdown('<div class="metric-header">🛏️ Beds Available</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{admin_data["beds_available"]}</div>', unsafe_allow_html=True)
+        with st.container(border=True,key="card_beds"):
+            st.markdown(metric_card("🛏️", "Beds Available", admin_data["beds_available"], "#818CF8"), unsafe_allow_html=True)
     with c3:
-        st.markdown('<div class="metric-header">🚪 Boarding in ED</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{admin_data["patients_boarding_ed"]}</div>', unsafe_allow_html=True)
+        with st.container(border=True,key="card_boarding"):
+            st.markdown(metric_card("🚪", "Boarding in ED", admin_data["patients_boarding_ed"], "#FBBF6E"), unsafe_allow_html=True)
     with c4:
-        st.markdown('<div class="metric-header">⏱️ Avg Boarding Hrs</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{admin_data["avg_boarding_hours"]}</div>', unsafe_allow_html=True)
+        with st.container(border=True,key="card_avgboard"):
+            st.markdown(metric_card("⏱️", "Boarding Hrs", admin_data["avg_boarding_hours"], "#F472B6"), unsafe_allow_html=True)
 
     st.write("")
 
+    # ---------------- METRIC CARDS (row 2) ----------------
     c5, c6, c7, c8 = st.columns(4)
     with c5:
-        st.markdown('<div class="metric-header">🩺 Total Doctors</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{admin_data["total_doctors"]}</div>', unsafe_allow_html=True)
+        with st.container(border=True,key="card_doctor"):
+            st.markdown(metric_card("🩺", "Total Doctors", admin_data["total_doctors"], "#2DD4BF"), unsafe_allow_html=True)
     with c6:
-        st.markdown('<div class="metric-header">👩‍⚕️ Total Nurses</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{admin_data["total_nurses"]}</div>', unsafe_allow_html=True)
+        with st.container(border=True,key="card_nurse"):
+            st.markdown(metric_card("👩‍⚕️", "Total Nurses", admin_data["total_nurses"], "#818CF8"), unsafe_allow_html=True)
     with c7:
-        st.markdown('<div class="metric-header">🧪 Pending Labs</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{admin_data["pending_lab_orders"]}</div>', unsafe_allow_html=True)
+        with st.container(border=True,key="card_lab"):
+            st.markdown(metric_card("🧪", "Pending Labs", admin_data["pending_lab_orders"], "#FBBF6E"), unsafe_allow_html=True)
     with c8:
-        st.markdown('<div class="metric-header">🩻 Pending Imaging</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{admin_data["pending_imaging_orders"]}</div>', unsafe_allow_html=True)
+        with st.container(border=True,key="card_image"):
+            st.markdown(metric_card("🩻", "Pending Imaging", admin_data["pending_imaging_orders"], "#F472B6"), unsafe_allow_html=True)
+
+    st.write("")
+
+    # ---------------- VISUAL INSIGHTS ----------------
+    st.subheader("📈 Visual Insights")
+
+    vcol1, vcol2, vcol3 = st.columns(3)
+
+    with vcol1:
+        with st.container(border=True):
+            load_df = pd.DataFrame({
+                "Metric": ["Patients in ED", "Beds Available", "Boarding in ED"],
+                "Count": [
+                    admin_data["current_patients_ed"],
+                    admin_data["beds_available"],
+                    admin_data["patients_boarding_ed"]
+                ]
+            })
+            fig = styled_bar(load_df, "Metric", "Count", {
+                "Patients in ED": "#2DD4BF",
+                "Beds Available": "#818CF8",
+                "Boarding in ED": "#F472B6"
+            }, "ED Load")
+            st.plotly_chart(fig, use_container_width=True, theme=None)
+
+    with vcol2:
+        with st.container(border=True):
+            staff_df = pd.DataFrame({
+                "Role": ["Doctors", "Nurses"],
+                "Count": [admin_data["total_doctors"], admin_data["total_nurses"]]
+            })
+            styled_donut(staff_df, "Role", "Count", {
+                "Doctors": "#2DD4BF", "Nurses": "#A78BFA"
+            }, "Staffing Split", key="staff_donut")
+
+    with vcol3:
+        with st.container(border=True):
+            orders_df = pd.DataFrame({
+                "Type": ["Lab Orders", "Imaging Orders"],
+                "Pending": [admin_data["pending_lab_orders"], admin_data["pending_imaging_orders"]]
+            })
+            styled_donut(orders_df, "Type", "Pending", {
+                "Lab Orders": "#FBBF24", "Imaging Orders": "#FB7185"
+            }, "Pending Orders Split", key="orders_donut")
