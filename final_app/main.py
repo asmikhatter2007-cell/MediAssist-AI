@@ -27,6 +27,7 @@ from pydantic import BaseModel, Field
 from typing import List, Literal
 import joblib
 import pandas as pd
+from datetime import datetime
 
 from inference_pipeline_final import DiseasePredictor
 
@@ -57,6 +58,8 @@ hospital_status_columns = joblib.load("models/hospital_status_columns.pkl")
 
 wait_time_model = joblib.load("models/wait_time_model.pkl")
 wait_doctor_model = joblib.load("models/wait_doctor_model.pkl")
+
+hospital_data=None
 
 
 # ---------------------------------------------------------------------------
@@ -312,6 +315,31 @@ def predict_doctor_wait(data: DoctorWaitRequest):
     prediction = wait_doctor_model.predict(df)[0]
     prediction = max(0, prediction)
     return {"estimated_doctor_wait": round(prediction, 2)}
+
+@app.post("/admin/update_hospital_data")
+def update_hospital_data(data: dict):
+    global hospital_data
+
+    hospital_data = data
+    hospital_data["last_updated"] = datetime.now().strftime("%d %b %Y • %I:%M %p")
+
+    return {"message": "Updated successfully"}
+
+@app.get("/admin/hospital_data")
+def get_hospital_data():
+    global hospital_data
+
+    if hospital_data is None:
+        return {
+            "has_data": False
+        }
+
+    return {
+        "has_data": True,
+        "admin_data": hospital_data,
+        "predicted_status": "Functional",
+        "predicted_status_message": "Hospital resources are operating normally."
+    }        
 
 
 if __name__ == "__main__":
