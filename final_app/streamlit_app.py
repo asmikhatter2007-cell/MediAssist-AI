@@ -105,7 +105,7 @@ with col_u1:
     with st.container(border=True):
         st.markdown("#### 👤 Patient Services")
         st.markdown("""
-        * 🔍 **Symptom Checker** — Review symptoms and check for likely illnesses
+        * 🧬 **Disease Predictor** — Review symptoms and check for likely illnesses
         * 👨‍⚕️ **Specialist Recommendation** — Find the appropriate clinical specialty
         * 🩺 **Before Triage Assistant** — Know what to expect before stepping inside
         * ⏳ **Waiting Time Estimation** — View personalized registration delays
