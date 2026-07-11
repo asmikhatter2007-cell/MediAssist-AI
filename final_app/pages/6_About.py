@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from navigation import render_sidebar
 
 st.set_page_config(page_title="About - MediAssist AI", page_icon="📋", layout="wide")
-render_sidebar(4) 
+render_sidebar(6) 
 
 # Inject global style wrappers
 st.markdown("""

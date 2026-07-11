@@ -2,7 +2,7 @@ import streamlit as st
 
 def render_sidebar(current_page_index):
     # Cross-theme resilient CSS supporting both high-contrast light and dark views
-# Systemic Premium Style Overrides
+    # Systemic Premium Style Overrides
     st.markdown(
         """
         <style>
@@ -82,6 +82,26 @@ def render_sidebar(current_page_index):
             font-weight: 800 !important;
             font-size: 2rem !important;
         }
+
+        /* ================= 3. SIDEBAR COLLAPSE ARROW VISIBILITY ================= */
+        /* Force color onto the svg wrapper, path attributes, and parent interactive zones */
+        span[data-testid="stIconMaterial"], 
+        .st-emotion-cache-ch5dqi e17vll9u0,
+        button[aria-label="Collapse sidebar"] svg,
+        button[aria-label="Expand sidebar"] svg,
+        [data-testid="sidebar-collapse-button"] svg {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            stroke: #ffffff !important; /* Forces outline icon sets to white */
+            opacity: 1 !important;
+        }
+
+        /* Target the internal SVG path elements specifically */
+        button[data-testid="sidebar-collapse-button"] svg *,
+        section[data-testid="stSidebarCollapseButton"] svg * {
+            stroke: #ffffff !important;
+            fill: #ffffff !important;
+        }
         </style>
         """,
         unsafe_allow_html=True
@@ -101,13 +121,15 @@ def render_sidebar(current_page_index):
         
         st.markdown("---")
 
-        # Main Navigation Radio Selector
+        # Main Navigation Radio Selector - Tracks 7 pages total (0 to 6)
         page = st.radio(
             "Navigation Menu",
             [
                 "🏠 Home", 
+                "🔍 Patient Symptom Checker",
                 "🩺 Patient Assistant Before Triage", 
                 "🚑 Patient Assistant After Triage", 
+                "⚙️ Admin Panel",
                 "📊 Dashboard",
                 "📋 About"
             ],
@@ -118,17 +140,25 @@ def render_sidebar(current_page_index):
         st.markdown("---")
         st.info("Select a module above to seamlessly navigate between features.")
 
-    # Core Dynamic Router
+    # ================= FIXED CORE DYNAMIC ROUTER =================
+    # Each condition matches the index configuration exactly
     if page == "🏠 Home" and current_page_index != 0:
         st.switch_page("streamlit_app.py")
-    elif page == "🩺 Patient Assistant Before Triage" and current_page_index != 1:
-        st.switch_page("pages/1_Patient_Assistant_Before_Triage.py")
-    elif page == "🚑 Patient Assistant After Triage" and current_page_index != 2:
-        try:
-            st.switch_page("pages/2_Patient_Assistant_After_Triage.py")
-        except Exception:
-            st.switch_page("pages/After_Triage.py")
-    elif page == "📊 Dashboard" and current_page_index != 3:
-        st.switch_page("pages/3_Dashboard.py")
-    elif page == "📋 About" and current_page_index != 4:
-        st.switch_page("pages/4_About.py")
+        
+    elif page == "🔍 Patient Symptom Checker" and current_page_index != 1:
+        st.switch_page("pages/1_Patient_Symptom_Checker.py")
+        
+    elif page == "🩺 Patient Assistant Before Triage" and current_page_index != 2:
+        st.switch_page("pages/2_Patient_Assistant_Before_Triage.py")
+        
+    elif page == "🚑 Patient Assistant After Triage" and current_page_index != 3:
+        st.switch_page("pages/3_Patient_Assistant_After_Triage.py")
+        
+    elif page == "⚙️ Admin Panel" and current_page_index != 4:
+        st.switch_page("pages/4_Admin.py")
+        
+    elif page == "📊 Dashboard" and current_page_index != 5:
+        st.switch_page("pages/5_Dashboard.py")
+        
+    elif page == "📋 About" and current_page_index != 6:
+        st.switch_page("pages/6_About.py")

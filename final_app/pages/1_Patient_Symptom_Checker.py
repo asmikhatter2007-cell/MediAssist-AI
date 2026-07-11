@@ -10,8 +10,8 @@ from navigation import render_sidebar
 
 # Page config
 st.set_page_config(
-    page_title="Patient Assistant Before Triage", 
-    page_icon="🩺", 
+    page_title="Patient Symptom Checker", 
+    page_icon="🔍", 
     layout="wide"
 )
 render_sidebar(1)
@@ -90,11 +90,11 @@ div[data-baseweb="select"] div {
 # Re-rendered title block separating the emoji icon from the gradient text text-fill masking properties
 st.markdown("""
 <div class="title-container">
-    <span class="title-icon">🩺</span>
-    <span class="title-text">Patient Assistant Before Triage</span>
+    <span class="title-icon">🔍</span>
+    <span class="title-text">Patient Symptom Checker</span>
 </div>
 """, unsafe_allow_html=True)
-st.caption("Clinical Decision Support Before Triage Assessment")
+st.caption("Clinical Decision Support Tool & Predictive Diagnosis Assessment")
 
 BASE_URL = "http://127.0.0.1:8000"
 

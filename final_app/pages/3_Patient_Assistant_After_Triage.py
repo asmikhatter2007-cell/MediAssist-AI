@@ -14,7 +14,7 @@ st.set_page_config(
     layout="wide"
 )
 
-render_sidebar(2)
+render_sidebar(3)
 
 now = datetime.now()
 
