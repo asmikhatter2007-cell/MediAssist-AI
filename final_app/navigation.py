@@ -155,7 +155,7 @@ def render_sidebar(current_page_index):
         st.switch_page("pages/3_Patient_Assistant_After_Triage.py")
         
     elif page == "⚙️ Admin Panel" and current_page_index != 4:
-        st.switch_page("pages/4_Admin.py")
+        st.switch_page("pages/4_Admin_Panel.py")
         
     elif page == "📊 Dashboard" and current_page_index != 5:
         st.switch_page("pages/5_Dashboard.py")
