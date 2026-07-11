@@ -290,17 +290,20 @@ if predict_clicked:
         now = datetime.now()
         
         wait_payload = {
-            "age": st.session_state.age, 
-            "sex": st.session_state.sex.lower(), 
-            "arrival_mode": st.session_state.arrival_mode, 
+            "age": int(st.session_state.age), 
+            "sex": str(st.session_state.sex).lower(), 
+            "arrival_mode": str(st.session_state.arrival_mode), 
             "time_of_day": now.strftime("%H:%M:%S"),
-            "day_of_week": now.strftime("%A").lower(), 
-            "chief_complaint": st.session_state.chief_complaint,
-            "chronic_illness": 1 if st.session_state.chronic_illness == "Yes" else 0, 
-            "ed_overcrowded": ED_OVERCROWDED,
-            "bed_available": BED_AVAILABLE, "floor_or_chair_care": FLOOR_OR_CHAIR_CARE,
-            "nurse_patient_ratio": NURSE_PATIENT_RATIO, "doctor_patient_ratio": DOCTOR_PATIENT_RATIO,
-            "labs_ordered": LABS_ORDERED, "imaging_ordered": IMAGING_ORDERED
+            "day_of_week": str(now.strftime("%A")).lower(), 
+            "chief_complaint": str(st.session_state.chief_complaint),
+            "chronic_illness": int(1 if st.session_state.chronic_illness == "Yes" else 0), 
+            "ed_overcrowded": int(ED_OVERCROWDED),
+            "bed_available": int(BED_AVAILABLE), 
+            "floor_or_chair_care": int(FLOOR_OR_CHAIR_CARE),
+            "nurse_patient_ratio": int(NURSE_PATIENT_RATIO),  # Fixed data type
+            "doctor_patient_ratio": int(DOCTOR_PATIENT_RATIO), # Fixed data type
+            "labs_ordered": int(LABS_ORDERED), 
+            "imaging_ordered": int(IMAGING_ORDERED)
         }
         
         try:
