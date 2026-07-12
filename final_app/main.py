@@ -31,6 +31,8 @@ import json
 import os
 from datetime import datetime
 
+BASE_DIR=os.path.dirname(os.path.abspath(__file__))
+
 from final_app.inference_pipeline_final import DiseasePredictor
 
 # ---------------------------------------------------------------------------
@@ -55,12 +57,21 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 predictor = DiseasePredictor()
 
-hospital_status_model = joblib.load("models/hospital_status_model.pkl")
-hospital_status_columns = joblib.load("models/hospital_status_columns.pkl")
+hospital_status_model = joblib.load(
+    os.path.join(BASE_DIR, "models", "hospital_status_model.pkl")
+)
 
-wait_time_model = joblib.load("models/wait_time_model.pkl")
-wait_doctor_model = joblib.load("models/wait_doctor_model.pkl")
+hospital_status_columns = joblib.load(
+    os.path.join(BASE_DIR, "models", "hospital_status_columns.pkl")
+)
 
+wait_time_model = joblib.load(
+    os.path.join(BASE_DIR, "models", "wait_time_model.pkl")
+)
+
+wait_doctor_model = joblib.load(
+    os.path.join(BASE_DIR, "models", "wait_doctor_model.pkl")
+)
 
 # ---------------------------------------------------------------------------
 # Single health check for the whole API
