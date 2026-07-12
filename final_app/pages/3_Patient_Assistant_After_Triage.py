@@ -191,11 +191,11 @@ if raw_admin_data and raw_admin_data.get("has_data"):
     
     last_update_str = raw_admin_data["admin_data"]["last_updated"].split("•")[-1].strip()
     
-    BED_AVAILABLE = int(raw_admin_metrics["beds_available"])
+    BED_AVAILABLE = 1 if int(raw_admin_metrics["beds_available"]) > 0 else 0
     ED_OVERCROWDED = 1 if h_status in ["Overcrowded", "Overwhelmed"] else 0
     FLOOR_OR_CHAIR_CARE = 0
-    LABS_ORDERED = int(raw_admin_metrics["pending_lab_orders"])
-    IMAGING_ORDERED = int(raw_admin_metrics["pending_imaging_orders"])
+    LABS_ORDERED = 1 if int(raw_admin_metrics["pending_lab_orders"]) > 0 else 0
+    IMAGING_ORDERED = 1 if int(raw_admin_metrics["pending_imaging_orders"]) > 0 else 0
 else:
     bed_status, bed_color = "🟢 Available", "#34D399"
     doc_status, doc_color = "🟢 Available", "#34D399"
@@ -316,15 +316,28 @@ st.write("")
 
 predict = st.button("Predict", type="primary", use_container_width=True)
 
+if 8 <= now.hour < 12:
+    time_of_day = "morning_08_12"
+
+elif 12 <= now.hour < 18:
+    time_of_day = "afternoon_12_18"
+
+elif 18 <= now.hour < 24:
+    time_of_day = "evening_18_00"
+
+else:
+    time_of_day = "night_00_08"
+
 if predict:
     with st.spinner("Generating predictions..."):
         now = datetime.now()
+
         payload = {
             "age": int(st.session_state.age), 
             "sex": str(st.session_state.sex).lower(), 
             "arrival_mode": str(st.session_state.arrival_mode), 
-            "time_of_day": now.strftime("%H:%M:%S"),
-            "day_of_week": str(now.strftime("%A")).lower(), 
+            "time_of_day": time_of_day,
+            "day_of_week": "weekend" if now.weekday() >= 5 else "weekday", 
             "chief_complaint": str(st.session_state.chief_complaint),
             "chronic_illness": int(1 if st.session_state.chronic_illness == "Yes" else 0), 
             "ed_overcrowded": int(ED_OVERCROWDED),
@@ -355,17 +368,18 @@ if predict:
                 raw_crowd = "High"
 
             if raw_admin_metrics:
+
                 hospital_status_payload = {
-                    "bed_available": int(raw_admin_metrics["beds_available"]),
-                    "nurse_patient_ratio": float(NURSE_PATIENT_RATIO),
-                    "doctor_patient_ratio": float(DOCTOR_PATIENT_RATIO),
+                    "bed_available": 1 if int(raw_admin_metrics["beds_available"]) > 0 else 0,
+                    "nurse_patient_ratio": int(NURSE_PATIENT_RATIO),
+                    "doctor_patient_ratio": int(DOCTOR_PATIENT_RATIO),
                     "boarding_in_ed": int(raw_admin_metrics["patients_boarding_ed"]),
                     "boarding_hrs": float(raw_admin_metrics["avg_boarding_hours"]),
-                    "labs_ordered": int(raw_admin_metrics["pending_lab_orders"]),
-                    "imaging_ordered": int(raw_admin_metrics["pending_imaging_orders"]),
+                    "labs_ordered": LABS_ORDERED,
+                    "imaging_ordered": IMAGING_ORDERED,
                     "wait_doctor_min": float(doctor_wait),
                     "arrival_mode": st.session_state.arrival_mode,
-                    "time_of_day": "morning" if (8 <= now.hour < 12) else ("evening" if (16 <= now.hour < 22) else "night"),
+                    "time_of_day": time_of_day,
                     "day_of_week": "weekend" if (now.weekday() >= 5) else "weekday"
                 }
                 status_resp = requests.post(f"{BASE_URL}/predict_hospital_status", json=hospital_status_payload)
@@ -383,38 +397,32 @@ if predict:
             else:
                 crowd_level = "🟠 Moderate"
 
-            # --- DYNAMIC 10-POINT ACCUMULATION SCORE ALGORITHM ---
-            risk_score = 0
-            if st.session_state.age >= 65:
-                risk_score += 1
-            if st.session_state.chronic_illness == "Yes":
-                risk_score += 1
-            
-            if st.session_state.arrival_mode == "ambulance":
-                risk_score += 2
-                
-            if st.session_state.triage_category == "very_urgent" or st.session_state.triage_category == "emergency":
-                risk_score += 2
-            elif st.session_state.triage_category == "urgent":
-                risk_score += 1
-            if hospital_status_prediction == "Overwhelmed":
-                risk_score += 2
-            elif hospital_status_prediction == "Overcrowded":
-                risk_score += 1
-            if BED_AVAILABLE < 10:
-                risk_score += 1
-            if BOARDING_IN_ED > 5:
-                risk_score += 1
+            admission_payload = {
+                "age": int(st.session_state.age),
+                "sex": st.session_state.sex.lower(),
+                "arrival_mode": st.session_state.arrival_mode,
+                "time_of_day": time_of_day,
+                "day_of_week": "weekend" if now.weekday() >= 5 else "weekday",
+                "triage_category": st.session_state.triage_category,
+                "chief_complaint": st.session_state.chief_complaint,
+                "chronic_illness": 1 if st.session_state.chronic_illness == "Yes" else 0,
+                "ed_overcrowded": ED_OVERCROWDED,
+                "bed_available": BED_AVAILABLE,
+                "nurse_patient_ratio": int(NURSE_PATIENT_RATIO),
+                "doctor_patient_ratio": int(DOCTOR_PATIENT_RATIO),
+                "wait_doctor_min": int(doctor_wait)
+            }
 
-            if risk_score >= 6:
-                risk_label = "🔴 High"
-                recommendation = "Consider early clinical admission pathway placement and immediate attending physician oversight review."
-            elif risk_score >= 3.5:
-                risk_label = "🟡 Moderate"
-                recommendation = "Observation tracking highly recommended. Patient parameters suggest high load likelihood for active board setup."
-            else:
-                risk_label = "🟢 Low"
-                recommendation = "Likely suitable for safe discharge options pending standard physician clearing summary workflows."
+            response = requests.post(
+                f"{BASE_URL}/admission_risk",
+                json=admission_payload
+            )
+
+            result = response.json()
+
+            risk_score = result["risk_score"]
+            risk_label = result["admission_risk"]
+            recommendation = result["recommendation"]
 
             def ring_pct(value, cap):
                 try: return max(0, min(100, (float(value) / cap) * 100))
@@ -496,4 +504,11 @@ if predict:
                 """, unsafe_allow_html=True)
 
         except Exception as e:
-            st.error("Backend is not running or returned an error context.")
+            st.error(f"Error: {e}")
+
+            if 'response' in locals():
+                try:
+                    st.write(response.status_code)
+                    st.write(response.text)
+                except:
+                    pass

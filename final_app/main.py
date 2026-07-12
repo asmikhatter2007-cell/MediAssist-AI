@@ -81,6 +81,14 @@ wait_doctor_model = joblib.load(
     os.path.join(BASE_DIR, "models", "wait_doctor_model.pkl")
 )
 
+admission_model = joblib.load(
+    os.path.join(BASE_DIR, "models", "admission_model.pkl")
+)
+
+admission_columns = joblib.load(
+    os.path.join(BASE_DIR, "models", "admission_columns.pkl")
+)
+
 # ---------------------------------------------------------------------------
 # Single health check for the whole API
 # ---------------------------------------------------------------------------
@@ -239,73 +247,76 @@ def predict_hospital_status(data: HospitalInput):
 
 class AdmissionInput(BaseModel):
     age: int
+    sex: str
+    arrival_mode: str
+    time_of_day: str
+    day_of_week: str
+    triage_category: str
+    chief_complaint: str
     chronic_illness: int
-
-    triage_category: Literal[
-        "non_urgent",
-        "standard",
-        "urgent",
-        "very_urgent",
-        "emergency"
-    ]
-
-    hospital_status: Literal[
-        "Functional",
-        "Overcrowded",
-        "Overwhelmed"
-    ]
-
-    bed_available: int
     ed_overcrowded: int
+    bed_available: int
+    nurse_patient_ratio: int
+    doctor_patient_ratio: int
+    wait_doctor_min: int
 
 
 @app.post("/admission_risk")
 def admission_risk(data: AdmissionInput):
-    risk_score = 0
 
-    if data.age >= 65:
-        risk_score += 1
+    try:
 
-    if data.chronic_illness == 1:
-        risk_score += 1
+        input_data = {col: 0 for col in admission_columns}
 
-    if data.triage_category == "emergency":
-        risk_score += 3
+        # Numerical features
+        input_data["age"] = data.age
+        input_data["chronic_illness"] = data.chronic_illness
+        input_data["ed_overcrowded"] = data.ed_overcrowded
+        input_data["bed_available"] = data.bed_available
+        input_data["nurse_patient_ratio"] = data.nurse_patient_ratio
+        input_data["doctor_patient_ratio"] = data.doctor_patient_ratio
+        input_data["wait_doctor_min"] = data.wait_doctor_min
 
-    if data.triage_category == "very_urgent":
-        risk_score += 2
+        # Dummy columns
+        for feature, value in [
+            ("sex", data.sex),
+            ("arrival_mode", data.arrival_mode),
+            ("time_of_day", data.time_of_day),
+            ("day_of_week", data.day_of_week),
+            ("triage_category", data.triage_category),
+            ("chief_complaint", data.chief_complaint)
+        ]:
 
-    elif data.triage_category == "urgent":
-        risk_score += 1
+            col = f"{feature}_{value}"
 
-    if data.hospital_status in ["Overcrowded", "Overwhelmed"]:
-        risk_score += 1
+            if col in input_data:
+                input_data[col] = 1
 
-    if data.bed_available < 10:
-        risk_score += 1
+        input_df = pd.DataFrame([input_data])
 
-    if data.ed_overcrowded == 1:
-        risk_score += 1
+        probability = float(admission_model.predict_proba(input_df)[0][1])
 
-    if risk_score <= 2:
-        risk = "🟢 Low"
-        recommendation = "Likely suitable for discharge after physician evaluation."
+        if probability >= 0.45:
+            risk = "🔴 High"
+            recommendation = "High likelihood of admission."
 
-    elif risk_score <= 4:
-        risk = "🟡 Moderate"
-        recommendation = "Observation recommended. Patient may require admission based on clinical assessment."
+        elif probability >= 0.30:
+            risk = "🟡 Moderate"
+            recommendation = "Observation recommended."
 
-    else:
-        risk = "🔴 High"
-        recommendation = "Consider early admission and immediate physician review."
+        else:
+            risk = "🟢 Low"
+            recommendation = "Likely suitable for discharge."
 
-    return {
-        "risk_score": risk_score,
-        "max_score": 8,
-        "admission_risk": risk,
-        "recommendation": recommendation
-    }
+        return {
+            "risk_score": round(probability * 10, 1),
+            "max_score": 10,
+            "admission_risk": risk,
+            "recommendation": recommendation
+        }
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ===========================================================================
 # WAIT TIME + DOCTOR WAIT
@@ -335,10 +346,21 @@ class DoctorWaitRequest(WaitRequest):
 
 @app.post("/predict_waittime")
 def predict_waittime(data: WaitRequest):
-    df = pd.DataFrame([data.model_dump()])
-    prediction = wait_time_model.predict(df)[0]
-    prediction = max(0, prediction)
-    return {"estimated_wait_time": round(prediction, 2)}
+    try:
+        df = pd.DataFrame([data.model_dump()])
+
+        print(df)
+        print(df.dtypes)
+
+        prediction = wait_time_model.predict(df)[0]
+
+        return {
+            "estimated_wait_time": round(max(0, prediction), 2)
+        }
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/predict_doctor_wait")

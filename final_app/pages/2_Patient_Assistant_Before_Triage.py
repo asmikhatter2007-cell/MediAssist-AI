@@ -285,6 +285,15 @@ st.write("")
 
 predict_clicked = st.button("Predict", type="primary", use_container_width=True)
 
+if 8 <= now.hour < 12:
+    time_of_day = "morning_08_12"
+elif 12 <= now.hour < 18:
+    time_of_day = "afternoon_12_18"
+elif 18 <= now.hour < 24:
+    time_of_day = "evening_18_00"
+else:
+    time_of_day = "night_00_08"
+
 if predict_clicked:
     with st.spinner("Generating predictions..."):
         now = datetime.now()
@@ -293,8 +302,8 @@ if predict_clicked:
             "age": int(st.session_state.age), 
             "sex": str(st.session_state.sex).lower(), 
             "arrival_mode": str(st.session_state.arrival_mode), 
-            "time_of_day": now.strftime("%H:%M:%S"),
-            "day_of_week": str(now.strftime("%A")).lower(), 
+            "time_of_day": time_of_day,
+            "day_of_week": "weekend" if now.weekday() >= 5 else "weekday", 
             "chief_complaint": str(st.session_state.chief_complaint),
             "chronic_illness": int(1 if st.session_state.chronic_illness == "Yes" else 0), 
             "ed_overcrowded": int(ED_OVERCROWDED),
@@ -307,7 +316,16 @@ if predict_clicked:
         }
         
         try:
-            wait_response = requests.post(f"{BASE_URL}/predict_waittime", json=wait_payload)
+            wait_response = requests.post(
+                f"{BASE_URL}/predict_waittime",
+                json=wait_payload
+            )
+
+            print(wait_response.status_code)
+            print(wait_response.text)
+
+            wait_response.raise_for_status()
+
             wait_time = wait_response.json()["estimated_wait_time"]
 
             # Smart Multi-Variable Crowd Logic
