@@ -25,9 +25,11 @@ import shap
 import json
 import os
 
-MODEL_DIR = "models"
-PROCESSED_DIR = "data/processed"
-MAPPING_PATH = "disease_specialist_department_final.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+PROCESSED_DIR = os.path.join(BASE_DIR, "data", "processed")
+MAPPING_PATH = os.path.join(BASE_DIR, "disease_specialist_department_final.csv")
 
 
 def clean_text(x):
