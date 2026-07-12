@@ -29,6 +29,8 @@ import joblib
 import pandas as pd
 import json
 import os
+import firebase_admin
+from firebase_admin import credentials, firestore
 from datetime import datetime
 
 from inference_pipeline_final import DiseasePredictor
@@ -36,6 +38,11 @@ from inference_pipeline_final import DiseasePredictor
 # ---------------------------------------------------------------------------
 # App setup (ONE instance shared by every route below)
 # ---------------------------------------------------------------------------
+# Firebase Firestore setup
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")
+    firebase_admin.initialize_app(cred)
+db = firestore.client()
 app = FastAPI(
     title="MediAssist-AI API",
     description="Unified backend: disease prediction, hospital status, "
@@ -370,13 +377,10 @@ def _get_day_of_week_bucket() -> str:
 def update_hospital_data(data: AdminInput):
     """Admin submits the manual hospital-wide numbers. Overwrites the
     previous snapshot - we only ever keep the latest one."""
-    os.makedirs(os.path.dirname(ADMIN_DATA_FILE), exist_ok=True)
-
     record = data.model_dump()
     record["last_updated"] = datetime.now().strftime("%d %b %Y, %I:%M %p")
 
-    with open(ADMIN_DATA_FILE, "w") as f:
-        json.dump(record, f, indent=2)
+    db.collection("admin").document("hospital_data").set(record)
 
     return {"message": "Hospital data updated successfully.", "data": record}
 
@@ -385,14 +389,15 @@ def update_hospital_data(data: AdminInput):
 def get_hospital_data():
     """Dashboard calls this to fetch the latest admin-entered numbers,
     plus a live hospital_status prediction computed from them."""
-    if not os.path.exists(ADMIN_DATA_FILE):
+    doc = db.collection("admin").document("hospital_data").get()
+
+    if not doc.exists:
         return {
             "has_data": False,
             "message": "No hospital data has been submitted by admin yet.",
         }
 
-    with open(ADMIN_DATA_FILE, "r") as f:
-        record = json.load(f)
+    record = doc.to_dict()
 
     # Derive the ratios/fields the hospital_status model actually expects
     nurse_patient_ratio = (
@@ -404,9 +409,6 @@ def get_hospital_data():
         if record["total_doctors"] > 0 else 0
     )
 
-    # NOTE: wait_doctor_min and arrival_mode aren't hospital-wide numbers -
-    # they were originally per-patient fields. We use a neutral default
-    # here since this call isn't tied to any specific patient.
     hospital_input = HospitalInput(
         bed_available=record["beds_available"],
         nurse_patient_ratio=round(nurse_patient_ratio, 2),
@@ -428,7 +430,6 @@ def get_hospital_data():
         "predicted_status": status_result["hospital_status"],
         "predicted_status_message": status_result["message"],
     }
-
 
 if __name__ == "__main__":
     import uvicorn

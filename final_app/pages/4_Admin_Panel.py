@@ -10,7 +10,7 @@ from navigation import render_sidebar
 st.set_page_config(page_title="Admin", page_icon="🔐", layout="wide")
 render_sidebar(4)
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 
 # CHANGE THIS before submission / demo
 ADMIN_PASSWORD = "admin123"

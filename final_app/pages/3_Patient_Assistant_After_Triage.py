@@ -155,7 +155,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.caption("Clinical Decision Support After Triage Assessment")
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 
 raw_admin_metrics = None
 h_status = "Functional"

@@ -151,7 +151,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.caption("Clinical Decision Support Before Triage Assessment")
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 
 try:
     response = requests.get(f"{BASE_URL}/admin/hospital_data")

@@ -101,7 +101,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.caption("Clinical Decision Support Tool & Predictive Diagnosis Assessment")
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 
 # Fetch the valid symptom list from the backend instead of loading the model locally
 @st.cache_data

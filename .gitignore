@@ -5,3 +5,4 @@ venv/
 .env
 .ipynb_checkpoints/
 data/hospital_admin_data.json
+firebase_key.json
