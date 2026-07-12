@@ -31,11 +31,11 @@ import json
 import os
 import firebase_admin
 from firebase_admin import credentials, firestore
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 BASE_DIR=os.path.dirname(os.path.abspath(__file__))
 
-from final_app.inference_pipeline_final import DiseasePredictor
+from inference_pipeline_final import DiseasePredictor
 
 # ---------------------------------------------------------------------------
 # App setup (ONE instance shared by every route below)
@@ -389,7 +389,8 @@ def update_hospital_data(data: AdminInput):
     """Admin submits the manual hospital-wide numbers. Overwrites the
     previous snapshot - we only ever keep the latest one."""
     record = data.model_dump()
-    record["last_updated"] = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    IST = timezone(timedelta(hours=5, minutes=30))
+    record["last_updated"] = datetime.now(IST).strftime("%d %b %Y, %I:%M %p")
 
     db.collection("admin").document("hospital_data").set(record)
 
