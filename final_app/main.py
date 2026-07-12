@@ -31,7 +31,7 @@ import json
 import os
 from datetime import datetime
 
-from inference_pipeline_final import DiseasePredictor
+from final_app.inference_pipeline_final import DiseasePredictor
 
 # ---------------------------------------------------------------------------
 # App setup (ONE instance shared by every route below)
