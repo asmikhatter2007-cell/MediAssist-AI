@@ -1,11 +1,11 @@
 {
-  "beds_available": 18,
-  "total_doctors": 11,
-  "current_patients_ed": 45,
-  "total_nurses": 17,
-  "pending_lab_orders": 9,
-  "pending_imaging_orders": 6,
-  "patients_boarding_ed": 8,
-  "avg_boarding_hours": 5.5,
-  "last_updated": "11 Jul 2026, 09:29 PM"
+  "beds_available": 4,
+  "total_doctors": 13,
+  "current_patients_ed": 100,
+  "total_nurses": 18,
+  "pending_lab_orders": 15,
+  "pending_imaging_orders": 20,
+  "patients_boarding_ed": 50,
+  "avg_boarding_hours": 8.0,
+  "last_updated": "12 Jul 2026, 11:30 AM"
 }
