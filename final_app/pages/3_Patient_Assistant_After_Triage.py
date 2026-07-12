@@ -179,7 +179,7 @@ if raw_admin_data and raw_admin_data.get("has_data"):
     docs = int(raw_admin_metrics["total_doctors"])
     nurses = int(raw_admin_metrics["total_nurses"])
     patients = int(raw_admin_metrics["current_patients_ed"])
-    
+    BOARDING_IN_ED = int(raw_admin_metrics["patients_boarding_ed"])
     DOCTOR_PATIENT_RATIO = (patients / docs) if docs > 0 else patients
     NURSE_PATIENT_RATIO = (patients / nurses) if nurses > 0 else patients
     
@@ -393,7 +393,6 @@ if predict:
             if st.session_state.arrival_mode == "ambulance":
                 risk_score += 2
                 
-            # FIXED: Added logical 'or' condition to ensure both emergency and very_urgent catch the full 2 points
             if st.session_state.triage_category == "very_urgent" or st.session_state.triage_category == "emergency":
                 risk_score += 2
             elif st.session_state.triage_category == "urgent":
@@ -404,7 +403,7 @@ if predict:
                 risk_score += 1
             if BED_AVAILABLE < 10:
                 risk_score += 1
-            if ED_OVERCROWDED == 1:
+            if BOARDING_IN_ED > 5:
                 risk_score += 1
 
             if risk_score >= 6:

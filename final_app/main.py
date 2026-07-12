@@ -193,8 +193,19 @@ def predict_hospital_status(data: HospitalInput):
 
     input_df = pd.DataFrame([input_data])
 
-    prediction = hospital_status_model.predict(input_df)[0]
+    # 1. Get the baseline machine learning model prediction
+    model_prediction = hospital_status_model.predict(input_df)[0]
 
+    # 2. SAFE OPERATIONAL OVERRIDE
+    # If telemetry figures show heavy stress, explicitly upgrade status thresholds
+    if data.boarding_in_ed >= 30 or data.nurse_patient_ratio >= 5.0:
+        prediction = "Overwhelmed"
+    elif data.boarding_in_ed >= 15 or data.nurse_patient_ratio >= 3.0:
+        prediction = "Overcrowded"
+    else:
+        prediction = str(model_prediction)
+
+    # 3. Dynamic display messages map mapping
     messages = {
         "Functional": "Hospital operating normally.",
         "Overcrowded": "Hospital is busy. Expect moderate delays.",

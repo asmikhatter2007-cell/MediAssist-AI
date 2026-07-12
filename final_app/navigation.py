@@ -145,7 +145,7 @@ main{
             "Navigation Menu",
             [
                 "🏠 Home", 
-                "🔍 Patient Symptom Checker",
+                "🧬 Patient Disease Predictor",
                 "🩺 Patient Assistant Before Triage", 
                 "🚑 Patient Assistant After Triage", 
                 "⚙️ Admin Panel",
@@ -164,8 +164,8 @@ main{
     if page == "🏠 Home" and current_page_index != 0:
         st.switch_page("streamlit_app.py")
         
-    elif page == "🔍 Patient Symptom Checker" and current_page_index != 1:
-        st.switch_page("pages/1_Patient_Symptom_Checker.py")
+    elif page == "🧬 Patient Disease Predictor" and current_page_index != 1:
+        st.switch_page("pages/1_Patient_Disease_Predictor.py")
         
     elif page == "🩺 Patient Assistant Before Triage" and current_page_index != 2:
         st.switch_page("pages/2_Patient_Assistant_Before_Triage.py")
