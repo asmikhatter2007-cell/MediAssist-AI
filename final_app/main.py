@@ -35,7 +35,7 @@ from datetime import datetime, timezone, timedelta
 
 BASE_DIR=os.path.dirname(os.path.abspath(__file__))
 
-from inference_pipeline_final import DiseasePredictor
+from final_app.inference_pipeline_final import DiseasePredictor
 
 # ---------------------------------------------------------------------------
 # App setup (ONE instance shared by every route below)
