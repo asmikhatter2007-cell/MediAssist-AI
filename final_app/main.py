@@ -42,7 +42,6 @@ from final_app.inference_pipeline_final import DiseasePredictor
 # ---------------------------------------------------------------------------
 # Firebase Firestore setup
 if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_key.json")
     firebase_creds = json.loads(os.environ["FIREBASE_CREDENTIALS"])
     cred = credentials.Certificate(firebase_creds)
     firebase_admin.initialize_app(cred)
