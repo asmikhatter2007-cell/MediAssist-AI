@@ -30,6 +30,7 @@ st.set_page_config(
 render_sidebar(3)
 
 now = datetime.now()
+BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 
 # Shared Environment Parameters Defaults
 NURSE_PATIENT_RATIO = 6
