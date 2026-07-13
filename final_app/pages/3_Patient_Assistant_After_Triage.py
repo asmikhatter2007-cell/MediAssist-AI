@@ -145,7 +145,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.caption("Clinical Decision Support After Triage Assessment")
 
-BASE_URL = "http://127.0.0.1:8000"
 h_status = "Functional"
 bed_status, bed_color = "🟢 Available", "#34D399"
 doc_status, doc_color = "🟢 Available", "#34D399"
