@@ -42,6 +42,7 @@ from final_app.inference_pipeline_final import DiseasePredictor
 # ---------------------------------------------------------------------------
 # Firebase Firestore setup
 if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")
     firebase_creds = json.loads(os.environ["FIREBASE_CREDENTIALS"])
     cred = credentials.Certificate(firebase_creds)
     firebase_admin.initialize_app(cred)
@@ -239,76 +240,73 @@ def predict_hospital_status(data: HospitalInput):
 
 class AdmissionInput(BaseModel):
     age: int
-    sex: str
-    arrival_mode: str
-    time_of_day: str
-    day_of_week: str
-    triage_category: str
-    chief_complaint: str
     chronic_illness: int
-    ed_overcrowded: int
+
+    triage_category: Literal[
+        "non_urgent",
+        "standard",
+        "urgent",
+        "very_urgent",
+        "emergency"
+    ]
+
+    hospital_status: Literal[
+        "Functional",
+        "Overcrowded",
+        "Overwhelmed"
+    ]
+
     bed_available: int
-    nurse_patient_ratio: int
-    doctor_patient_ratio: int
-    wait_doctor_min: int
+    ed_overcrowded: int
 
 
 @app.post("/admission_risk")
 def admission_risk(data: AdmissionInput):
-    try:
-        # --- DYNAMIC 10-POINT ACCUMULATION SCORE ALGORITHM ---
-        risk_score = 0
-        
-        # 1. Age Factor
-        if data.age >= 65:
-            risk_score += 1
-            
-        # 2. Chronic Illness Factor
-        if data.chronic_illness == 1:
-            risk_score += 1
-        
-        # 3. Arrival Mode Factor
-        if data.arrival_mode.lower() == "ambulance":
-            risk_score += 2
-            
-        # 4. Triage Urgency Level Factors
-        if data.triage_category.lower() in ["very_urgent", "emergency"]:
-            risk_score += 2
-        elif data.triage_category.lower() == "urgent":
-            risk_score += 1
-            
-        # 5. Overcrowding Load Factors
-        if data.ed_overcrowded == 1:
-            risk_score += 1
-        if data.nurse_patient_ratio >= 4:
-            risk_score += 1
-            
-        # 6. Capacity Limitations Factors
-        if data.bed_available < 10:
-            risk_score += 1
-        if data.wait_doctor_min >= 45:
-            risk_score += 1
+    risk_score = 0
 
-        # Determine explicit risk category strings and text instructions matching your UI thresholds
-        if risk_score >= 6:
-            risk_label = "🔴 High"
-            recommendation = "Consider early clinical admission pathway placement and immediate attending physician oversight review."
-        elif risk_score >= 3.5:
-            risk_label = "🟡 Moderate"
-            recommendation = "Observation tracking highly recommended. Patient parameters suggest high load likelihood for active board setup."
-        else:
-            risk_label = "🟢 Low"
-            recommendation = "Likely suitable for safe discharge options pending standard physician clearing summary workflows."
+    if data.age >= 65:
+        risk_score += 1
 
-        return {
-            "risk_score": float(risk_score), 
-            "max_score": 10, 
-            "admission_risk": risk_label, 
-            "recommendation": recommendation
-        }
+    if data.chronic_illness == 1:
+        risk_score += 1
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if data.triage_category == "emergency":
+        risk_score += 3
+
+    if data.triage_category == "very_urgent":
+        risk_score += 2
+
+    elif data.triage_category == "urgent":
+        risk_score += 1
+
+    if data.hospital_status in ["Overcrowded", "Overwhelmed"]:
+        risk_score += 1
+
+    if data.bed_available < 10:
+        risk_score += 1
+
+    if data.ed_overcrowded == 1:
+        risk_score += 1
+
+    if risk_score <= 2:
+        risk = "🟢 Low"
+        recommendation = "Likely suitable for discharge after physician evaluation."
+
+    elif risk_score <= 4:
+        risk = "🟡 Moderate"
+        recommendation = "Observation recommended. Patient may require admission based on clinical assessment."
+
+    else:
+        risk = "🔴 High"
+        recommendation = "Consider early admission and immediate physician review."
+
+    return {
+        "risk_score": risk_score,
+        "max_score": 8,
+        "admission_risk": risk,
+        "recommendation": recommendation
+    }
+
 
 # ===========================================================================
 # WAIT TIME + DOCTOR WAIT
@@ -338,21 +336,10 @@ class DoctorWaitRequest(WaitRequest):
 
 @app.post("/predict_waittime")
 def predict_waittime(data: WaitRequest):
-    try:
-        df = pd.DataFrame([data.model_dump()])
-
-        print(df)
-        print(df.dtypes)
-
-        prediction = wait_time_model.predict(df)[0]
-
-        return {
-            "estimated_wait_time": round(max(0, prediction), 2)
-        }
-
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=str(e))
+    df = pd.DataFrame([data.model_dump()])
+    prediction = wait_time_model.predict(df)[0]
+    prediction = max(0, prediction)
+    return {"estimated_wait_time": round(prediction, 2)}
 
 
 @app.post("/predict_doctor_wait")
