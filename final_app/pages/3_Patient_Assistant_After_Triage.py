@@ -145,15 +145,59 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.caption("Clinical Decision Support After Triage Assessment")
 
-h_status = "Functional"
-bed_status, bed_color = "🟢 Available", "#34D399"
-doc_status, doc_color = "🟢 Available", "#34D399"
-nurse_status, nurse_color = "🟠 Moderate Load", "#FBBF6E"
+# Fetch the real live hospital metrics from your Render API
+try:
+    live_data = requests.get(f"{BASE_URL}/admin/hospital_data").json()
+    if live_data.get("has_data"):
+        # Extract the real status and admin records
+        h_status = live_data["predicted_status"] 
+        admin_rec = live_data["admin_data"]
+        
+        # Calculate bed capacity
+        beds_left = admin_rec.get("beds_available", 0)
+        if beds_left <= 5:
+            bed_status, bed_color = "🔴 Critical", "#F87171"
+            BED_AVAILABLE = 0
+            ED_OVERCROWDED = 1
+        else:
+            bed_status, bed_color = "🟢 Available", "#34D399"
+            BED_AVAILABLE = 1
+            ED_OVERCROWDED = 0
+            
+        # Determine UI text mapping
+        status_msg = live_data["predicted_status_message"]
+        h_color = "#FBBF6E" if h_status == "Overcrowded" else ("#F87171" if h_status == "Overwhelmed" else "#34D399")
+        
+        # Calculate dynamic nursing load
+        patients = admin_rec.get("current_patients_ed", 0)
+        nurses = admin_rec.get("total_nurses", 1)
+        ratio = patients / nurses
+        if ratio >= 3.0:
+            nurse_status, nurse_color = "🔴 Heavy Load", "#F87171"
+        else:
+            nurse_status, nurse_color = "🟠 Moderate Load", "#FBBF6E"
+            
+        # Doctor Availability Logic (Matching dashboard fallback)
+        doc_status, doc_color = "🟢 Available", "#34D399"
+            
+    else:
+        # Fallbacks if backend has no data yet
+        h_status, h_color, status_msg = "Functional", "#34D399", "Hospital operating normally."
+        bed_status, bed_color = "🟢 Available", "#34D399"
+        doc_status, doc_color = "🟢 Available", "#34D399"
+        nurse_status, nurse_color = "🟠 Moderate Load", "#FBBF6E"
+except Exception as e:
+    # Error fallback
+    h_status, h_color, status_msg = "Functional", "#34D399", "Hospital operating normally."
+    bed_status, bed_color = "🟢 Available", "#34D399"
+    doc_status, doc_color = "🟢 Available", "#34D399"
+    nurse_status, nurse_color = "🟠 Moderate Load", "#FBBF6E"
+
 last_update_str = now.strftime('%I:%M %p')
 
 c_a, c_b, c_c, c_d, c_e = st.columns(5)
 with c_a:
-    st.markdown(f'<div class="info-title">🏥 Hospital Status</div><div class="info-value" style="color:#34D399;">🟢 Functional</div><div style="font-size:11px; color:#9BA3C7;">Minimal Delay</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="info-title">🏥 Hospital Status</div><div class="info-value" style="color:{h_color};">🟢 {h_status}</div><div style="font-size:11px; color:#9BA3C7;">{status_msg}</div>', unsafe_allow_html=True)
 with c_b:
     st.markdown(f'<div class="info-title">🛏️ Bed Capacity</div><div class="info-value" style="color:{bed_color};">{bed_status}</div>', unsafe_allow_html=True)
 with c_c:
