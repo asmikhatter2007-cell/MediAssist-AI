@@ -26,7 +26,7 @@ html, body{ background: #0C1024 !important; }
         linear-gradient(160deg, #0B0F22 0%, #101833 50%, #0C1024 100%);
     color: #EEF1FB;
 }
-.block-container{ padding-top: 4.5rem !important; max-width: 900px; }
+.block-container{ padding-top: 4.5rem !important; max-width: 1200px; }
 .title-container { display: flex; align-items: center; gap: 15px; margin-bottom: 5px; }
 .title-icon { font-size: 2.8rem; }
 .title-text {
@@ -42,11 +42,18 @@ div[data-testid="stVerticalBlockBorderWrapper"]{
     padding:20px !important;
 }
 .stButton>button{
-    width:100%; border-radius:16px; height:52px;
-    background: linear-gradient(90deg, #2DD4BF 0%, #818CF8 50%, #F472B6 100%);
-    background-size: 200% auto; color:#0C1024; font-size:17px; font-weight:800; border:none;
+    width:100% !important; border-radius:16px !important; height:58px !important;
+    background: linear-gradient(90deg, #2DD4BF 0%, #818CF8 50%, #F472B6 100%) !important;
+    background-size: 200% auto !important; color:#0C1024 !important; font-size:19px !important; font-weight:800 !important; border:none !important;
+    box-shadow: 0 14px 34px rgba(129,140,248,0.30) !important; transition: all 0.25s ease !important;
 }
-.stButton>button:hover{ background-position: right center; }
+.stButton>button:hover{ background-position: right center !important; transform: translateY(-2px) !important; }
+
+/* FIX: Forces all inner text elements to display extra bold and inherit full width alignment styling */
+.stButton>button p, .stButton>button span div, .stButton>button div p { 
+    color:#0C1024 !important; 
+    font-weight:800 !important; 
+}
 .stButton>button p{ color:#0C1024 !important; font-weight:800 !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -67,12 +74,20 @@ if not st.session_state.admin_authenticated:
     with st.container(border=True):
         st.subheader("🔑 Admin Login")
         password_input = st.text_input("Password", type="password")
-        if st.button("Login"):
-            if password_input == ADMIN_PASSWORD:
-                st.session_state.admin_authenticated = True
-                st.rerun()
-            else:
-                st.error("Incorrect password.")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # 1. Create columns to center the button nicely inside the card
+        _, btn_col, _ = st.columns([1.5, 1, 1.5])
+        
+        with btn_col:
+            # 2. Place the button inside the middle column
+            if st.button("Login", type="primary", use_container_width=True):
+                if password_input == ADMIN_PASSWORD:
+                    st.session_state.admin_authenticated = True
+                    st.rerun()
+                else:
+                    st.error("Incorrect password.")
     st.stop()
 
 # ---------------- ADMIN FORM (only reached if authenticated) ----------------
@@ -80,7 +95,7 @@ col_a, col_b = st.columns([5, 1])
 with col_a:
     st.success("Logged in as Admin")
 with col_b:
-    if st.button("Logout"):
+    if st.button("Logout", type="primary", use_container_width=True):
         st.session_state.admin_authenticated = False
         st.rerun()
 
@@ -100,7 +115,15 @@ with st.container(border=True):
         patients_boarding_ed = st.number_input("Patients Boarding in ED", min_value=0, value=5)
         avg_boarding_hours = st.number_input("Average Boarding Hours", min_value=0.0, value=2.5, step=0.5)
 
-    submit = st.button("Save & Update Dashboard", type="primary")
+    # 1. Add visual breathing room between the inputs and the button
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # 2. Create asymmetric columns to tuck a premium-sized button right in the center
+    _, submit_col, _ = st.columns([1.2, 1.6, 1.2])
+
+    with submit_col:
+        # 3. Render the smaller centered button securely
+        submit = st.button("Save & Update Dashboard", type="primary", use_container_width=True)
 
     if submit:
         payload = {

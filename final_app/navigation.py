@@ -22,105 +22,81 @@ div[data-testid="stSidebarUserContent"]{
     display:none;
 }
 
-/* Hide radio dots */
-
-div[data-testid="stRadio"] [data-testid="stRadioDot"]{
+/* --- FIXED: Hide radio dots completely across all Streamlit versions --- */
+div[data-testid="stRadio"] [data-testid="stRadioDot"] {
     display:none !important;
 }
 
-div[data-testid="stRadio"] label div[dir="ltr"] > div:first-child{
-    display:none !important;
+div[data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child {
+    display: none !important;
 }
 
-/* Navigation cards */
+div[data-testid="stRadio"] [data-testid="stWidgetLabel"] + div div[dir="ltr"] > div:first-child {
+    display: none !important;
+}
+
+/* ================= NAVIGATION CARDS ================= */
 
 div[data-testid="stRadio"] > div[role="radiogroup"]{
     gap:12px;
 }
 
-div[data-testid="stRadio"] > div[role="radiogroup"] > label{
-
-    width:100%;
+/* Default state for unselected cards */
+div[data-testid="stRadio"] > div[role="radiogroup"] > label {
+    width:100% !important;
     padding:14px 18px !important;
-
     border-radius:14px !important;
-
-    background:rgba(255,255,255,.05) !important;
-
+    background: rgba(255,255,255,.05) !important;
     border:1px solid rgba(255,255,255,.08) !important;
-
-    transition:.25s;
-
+    transition:.25s ease-in-out;
+    cursor: pointer;
 }
 
 div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover{
-
     background:rgba(255,255,255,.08) !important;
-
     transform:translateX(5px);
-
 }
 
-div[data-testid="stRadio"] > div[role="radiogroup"] > label[aria-checked="true"]{
-
-    background:linear-gradient(135deg,#2563EB,#1D4ED8) !important;
-
-    border-color:#2563EB !important;
-
+/* --- FIXED: Styles the active/selected nav button container with your exact blue --- */
+div[data-testid="stRadio"] > div[role="radiogroup"] label:has(input:checked) {
+    background: linear-gradient(135deg,#2563EB,#1D4ED8) !important;
+    border-color: #2563EB !important;
+    box-shadow: 0px 4px 12px rgba(37, 99, 235, 0.2) !important;
 }
 
-div[data-testid="stRadio"] p{
-
-    color:white !important;
-
-    font-size:15px !important;
-
-    font-weight:600 !important;
-
+/* Card Text Style */
+div[data-testid="stRadio"] p {
+    color: white !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
 }
 
 /* Sidebar collapse arrow */
-
 [data-testid="stSidebarCollapseButton"]{
-
     color:white !important;
-
 }
 
 [data-testid="stSidebarCollapseButton"] svg{
-
     fill:white !important;
-
     stroke:white !important;
-
 }
 
 /* Metric visibility */
-
 div[data-testid="stMetricLabel"] p{
-
     color:white !important;
-
 }
 
 div[data-testid="stMetricValue"]{
-
     color:#2DD4BF !important;
-
 }
 
 /* Prevent weird shifting */
-
 [data-testid="stAppViewContainer"]{
-
     overflow-x:hidden;
-
 }
 
 main{
-
     transition:margin-left .25s ease;
-
 }
 
 </style>
@@ -160,7 +136,6 @@ main{
         st.info("Select a module above to seamlessly navigate between features.")
 
     # ================= FIXED CORE DYNAMIC ROUTER =================
-    # Each condition matches the index configuration exactly
     if page == "🏠 Home" and current_page_index != 0:
         st.switch_page("streamlit_app.py")
         

@@ -125,7 +125,11 @@ div[data-baseweb="select"] > div{
     transform: translateY(-2px); 
     box-shadow: 0 18px 42px rgba(244,114,182,0.35) !important;
 }
-
+/* Forces primary button container text structures to display extra bold */
+.stButton>button p, .stButton>button matrix, .stButton>button span div, .stButton>button div p {
+    color: #0C1024 !important;
+    font-weight: 800 !important;
+}
 .ring-card{
     background: rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.10); border-radius:20px;
     padding:22px; text-align:center; backdrop-filter: blur(16px); box-shadow: 0 16px 40px rgba(0,0,0,0.3);
@@ -201,7 +205,7 @@ except Exception as e:
     bed_status, bed_color = "🟢 Available", "#34D399"
     doc_status, doc_color = "🟢 Available", "#34D399"
     nurse_status, nurse_color = "🟠 Moderate Load", "#FBBF6E"
-    
+
 last_update_str = now.strftime('%I:%M %p')
 
 c_a, c_b, c_c, c_d, c_e = st.columns(5)
