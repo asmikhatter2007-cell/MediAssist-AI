@@ -229,21 +229,14 @@ if predict:
     with st.spinner("Generating predictions..."):
         time_of_day = "morning_08_12" if 8 <= now.hour < 12 else ("afternoon_12_18" if 12 <= now.hour < 18 else "evening_18_00")
         
-        # Format incoming payload parameters for /admission_risk endpoint mapping
+        # Format incoming payload parameters to match the backend schema exactly
         payload = {
             "age": int(st.session_state.age), 
-            "sex": str(st.session_state.sex).lower(), 
-            "arrival_mode": str(st.session_state.arrival_mode), 
-            "time_of_day": time_of_day,
-            "day_of_week": "weekend" if now.weekday() >= 5 else "weekday", 
-            "chief_complaint": str(st.session_state.chief_complaint),
             "chronic_illness": int(1 if st.session_state.chronic_illness == "Yes" else 0), 
-            "ed_overcrowded": int(ED_OVERCROWDED),
+            "triage_category": str(st.session_state.triage_category),
+            "hospital_status": str(h_status),  # Added this field from your global variable
             "bed_available": int(BED_AVAILABLE), 
-            "nurse_patient_ratio": int(NURSE_PATIENT_RATIO),  
-            "doctor_patient_ratio": int(DOCTOR_PATIENT_RATIO), 
-            "wait_doctor_min": 35, # Default estimation baseline
-            "triage_category": str(st.session_state.triage_category)
+            "ed_overcrowded": int(ED_OVERCROWDED)
         }
         
         try:
