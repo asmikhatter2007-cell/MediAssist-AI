@@ -293,17 +293,30 @@ if predict_clicked:
             "imaging_ordered": int(IMAGING_ORDERED)
         }
         
-        # Pull baseline dynamic metric fallback configurations
-        wait_time = 15
-        crowd_level = "🟢 Low"
+        try:
+            # 1. FETCH REAL PREDICTION FROM YOUR BACKEND
+            response = requests.post(f"{BASE_URL}/predict_waittime", json=wait_payload)
+            response.raise_for_status()
+            result = response.json()
+            
+            # 2. ASSIGN REAL VALUES
+            wait_time = int(round(result.get("estimated_wait_time", 0), 0))
+            crowd_level = "High" if ED_OVERCROWDED == 1 else "Low"
+            crowd_color = "#F87171" if ED_OVERCROWDED == 1 else "#34D399"
+            crowd_pct = 75 if ED_OVERCROWDED == 1 else 33
+            
+        except Exception as e:
+            st.error(f"Could not connect to prediction server: {e}")
+            wait_time = 0
+            crowd_level = "Unknown"
+            crowd_color = "#818CF8"
+            crowd_pct = 0
 
         wait_pct = ring_pct(wait_time, 60)
-        crowd_color = "#34D399"
-        crowd_pct = 33
-
         with st.container(border=True):
             st.subheader("📊 Prediction Results")
             col_r1, col_r2 = st.columns(2)
+
             with col_r1:
                 st.markdown(f"""
                 <div class="ring-card">
@@ -317,7 +330,7 @@ if predict_clicked:
                 st.markdown(f"""
                 <div class="ring-card">
                     <div class="ring" style="background:conic-gradient({crowd_color} 0% {crowd_pct}%, rgba(255,255,255,0.08) {crowd_pct}% 100%);">
-                        <div class="ring-inner"><div class="ring-num" style="font-size:15px;">Low</div></div>
+                        <div class="ring-inner"><div class="ring-num" style="font-size:15px;">{crowd_level}</div></div>
                     </div>
                     <div class="result-label">📈 Crowd Level</div>
                 </div>

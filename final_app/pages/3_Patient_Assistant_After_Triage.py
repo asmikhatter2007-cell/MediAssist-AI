@@ -18,6 +18,12 @@ if "chief_complaint" not in st.session_state:
 if "triage_category" not in st.session_state:
     st.session_state.triage_category = "standard"
 
+def ring_pct(value, cap):
+    try: 
+        return max(0, min(100, (float(value) / cap) * 100))
+    except (ValueError, TypeError): 
+        return 0
+
 # Navigation Setup
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from navigation import render_sidebar
@@ -273,36 +279,56 @@ if predict:
     with st.spinner("Generating predictions..."):
         time_of_day = "morning_08_12" if 8 <= now.hour < 12 else ("afternoon_12_18" if 12 <= now.hour < 18 else "evening_18_00")
         
-        # Format incoming payload parameters to match the backend schema exactly
         payload = {
             "age": int(st.session_state.age), 
             "chronic_illness": int(1 if st.session_state.chronic_illness == "Yes" else 0), 
             "triage_category": str(st.session_state.triage_category),
-            "hospital_status": str(h_status),  # Added this field from your global variable
+            "hospital_status": str(h_status),
             "bed_available": int(BED_AVAILABLE), 
             "ed_overcrowded": int(ED_OVERCROWDED)
         }
+
+        doctor_wait_payload = {
+            "age": int(st.session_state.age),
+            "sex": str(st.session_state.sex).lower(),
+            "arrival_mode": str(st.session_state.arrival_mode),
+            "time_of_day": "morning_08_12", # Use your time logic here
+            "day_of_week": "weekend" if now.weekday() >= 5 else "weekday",
+            "chief_complaint": str(st.session_state.chief_complaint),
+            "chronic_illness": int(1 if st.session_state.chronic_illness == "Yes" else 0),
+            "ed_overcrowded": int(ED_OVERCROWDED),
+            "bed_available": int(BED_AVAILABLE),
+            "floor_or_chair_care": int(FLOOR_OR_CHAIR_CARE),
+            "nurse_patient_ratio": int(NURSE_PATIENT_RATIO),
+            "doctor_patient_ratio": int(DOCTOR_PATIENT_RATIO),
+            "labs_ordered": int(LABS_ORDERED),
+            "imaging_ordered": int(IMAGING_ORDERED),
+            "triage_performed": 1, # Since this is after triage
+            "triage_category": str(st.session_state.triage_category),
+            "wait_triage_min": 0 # Default or captured from user
+        }
         
         try:
-            response = requests.post(f"{BASE_URL}/admission_risk", json=payload)
-            response.raise_for_status()
-            result = response.json()
+            # 2. API CALLS
+            risk_response = requests.post(f"{BASE_URL}/admission_risk", json=payload)
+            wait_response = requests.post(f"{BASE_URL}/predict_doctor_wait", json=doctor_wait_payload)
             
-            risk_score = result["risk_score"]
-            risk_label = result["admission_risk"]
-            recommendation = result["recommendation"]
+            risk_result = risk_response.json()
+            wait_result = wait_response.json()
             
-            doctor_wait = 35
-            crowd_level = "🟠 Moderate"
-
-            def ring_pct(value, cap):
-                try: return max(0, min(100, (float(value) / cap) * 100))
-                except (ValueError, TypeError): return 0
-
+            # 3. EXTRACT RESULTS
+            doctor_wait = int(round(wait_result.get("estimated_doctor_wait", 0), 0))
+            risk_score = risk_result["risk_score"]
+            risk_label = risk_result["admission_risk"]
+            recommendation = risk_result["recommendation"]
+            
+            # Dynamic crowd values
+            crowd_level = "High" if ED_OVERCROWDED == 1 else "Moderate"
+            crowd_color = "#F87171" if ED_OVERCROWDED == 1 else "#FBBF6E"
+            crowd_pct = 75 if ED_OVERCROWDED == 1 else 66
+            
+            # 4. RENDER UI (MOVED OUTSIDE EXCEPT BLOCK)
             doc_pct = ring_pct(doctor_wait, 80)
-            crowd_color = "#FBBF6E"
-            crowd_pct = 66
-            
             risk_color = {"🟢 Low": "#34D399", "🟡 Moderate": "#FBBF6E", "🔴 High": "#F87171"}.get(risk_label, "#818CF8")
             risk_pct = (risk_score / 10.0) * 100
 
@@ -311,63 +337,13 @@ if predict:
                 c1, c2, c3 = st.columns(3)
                 
                 with c1:
-                    st.markdown(f"""
-                    <div class="ring-card">
-                        <div class="ring" style="background:conic-gradient(#818CF8 0% {doc_pct}%, rgba(255,255,255,0.08) {doc_pct}% 100%);">
-                            <div class="ring-inner"><div class="ring-num">{doctor_wait}</div><div class="ring-sub">min</div></div>
-                        </div>
-                        <div class="result-label">👨‍⚕️ Doctor Wait</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
+                    st.markdown(f'<div class="ring-card"><div class="ring" style="background:conic-gradient(#818CF8 0% {doc_pct}%, rgba(255,255,255,0.08) {doc_pct}% 100%);"><div class="ring-inner"><div class="ring-num">{doctor_wait}</div><div class="ring-sub">min</div></div></div><div class="result-label">👨‍⚕️ Doctor Wait</div></div>', unsafe_allow_html=True)
                 with c2:
-                    st.markdown(f"""
-                    <div class="ring-card">
-                        <div class="ring" style="background:conic-gradient({crowd_color} 0% {crowd_pct}%, rgba(255,255,255,0.08) {crowd_pct}% 100%);">
-                            <div class="ring-inner"><div class="ring-num" style="font-size:15px;">Moderate</div></div>
-                        </div>
-                        <div class="result-label">📈 Crowd Level</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
+                    st.markdown(f"""<div class="ring-card"><div class="ring" style="background:conic-gradient({crowd_color} 0% {crowd_pct}%, rgba(255,255,255,0.08) {crowd_pct}% 100%);"><div class="ring-inner"><div class="ring-num" style="font-size:15px;">{crowd_level}</div></div></div><div class="result-label">📈 Crowd Level</div></div>""", unsafe_allow_html=True)
                 with c3:
-                    st.markdown(f"""
-                    <div class="ring-card">
-                        <div class="ring" style="background:conic-gradient({risk_color} 0% {risk_pct}%, rgba(255,255,255,0.08) {risk_pct}% 100%);">
-                            <div class="ring-inner"><div class="ring-num">{int(float(risk_score))}/10</div><div class="ring-sub">Score</div></div>
-                        </div>
-                        <div class="result-label">🚨 Admission Likelihood</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    st.markdown(f'<div class="ring-card"><div class="ring" style="background:conic-gradient({risk_color} 0% {risk_pct}%, rgba(255,255,255,0.08) {risk_pct}% 100%);"><div class="ring-inner"><div class="ring-num">{int(float(risk_score))}/10</div><div class="ring-sub">Score</div></div></div><div class="result-label">🚨 Admission Likelihood</div></div>', unsafe_allow_html=True)
 
-                st.markdown("<br>", unsafe_allow_html=True)
-
-                st.markdown(f"""
-                <div style="background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.10); border-radius: 18px; padding: 20px; backdrop-filter: blur(14px); box-shadow: 0 14px 34px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 20px;">
-                    <div style="font-size: 2.3rem; flex-shrink: 0;">🏥</div>
-                    <div>
-                        <h4 style="color:{risk_color}; margin: 0 0 6px 0; font-weight:700; font-size: 19px; display: flex; align-items: center; gap: 8px;">
-                            Clinical Assessment: {risk_label} Admission Likelihood
-                        </h4>
-                        <p style="color:#C3CAE8; margin: 0; font-size: 14.5px; line-height: 1.5;">{recommendation}</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-                st.markdown("""
-                <br>
-                <div style="background: rgba(129, 140, 248, 0.06); border: 1px solid rgba(129, 140, 248, 0.25); border-radius: 18px; padding: 20px; backdrop-filter: blur(14px); box-shadow: 0 14px 34px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 20px;">
-                    <div style="font-size: 2.3rem; flex-shrink: 0;">📋</div>
-                    <div>
-                        <h4 style="color:#818CF8; margin: 0 0 6px 0; font-weight:700; font-size: 17px;">Next Steps for Care Progression</h4>
-                        <div style="color:#C3CAE8; font-size: 14px; line-height: 1.6; font-weight: 500;">
-                            1. Please remain seated comfortably in the triage waiting area until your name is broadcast over the loudspeaker system.<br>
-                            2. Keep your mobile communication devices nearby and active for automated placement alerts.<br>
-                            3. Ensure any physical copies of past medication prescriptions or lab records are organized and ready for primary physician intake review.
-                        </div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(f'<br><div style="background: rgba(255,255,255,0.045); border-radius: 18px; padding: 20px; display: flex; align-items: center; gap: 20px;"><div style="font-size: 2.3rem;">🏥</div><div><h4 style="color:{risk_color}; font-weight:700;">Clinical Assessment: {risk_label} Admission Likelihood</h4><p style="color:#C3CAE8;">{recommendation}</p></div></div>', unsafe_allow_html=True)
 
         except Exception as e:
-            st.error(f"Backend is not running or returned an error context: {str(e)}")
+            st.error(f"Backend error: {str(e)}")
