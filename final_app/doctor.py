@@ -13,7 +13,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
-import shap
+
 
 # =====================================================
 # Load All 3 Subsets — More Data = Better Model
@@ -81,7 +81,9 @@ numeric_features = [
     'floor_or_chair_care',
     'nurse_patient_ratio',
     'doctor_patient_ratio',
-    'wait_triage_min'
+    'wait_triage_min',
+    'labs_ordered',
+    'imaging_ordered'
 ]
 
 categorical_features = [
