@@ -13,7 +13,7 @@ render_sidebar(4)
 BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 
 # CHANGE THIS before submission / demo
-ADMIN_PASSWORD = "admin123"
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 st.markdown("""
 <style>
