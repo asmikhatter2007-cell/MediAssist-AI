@@ -13,7 +13,7 @@ st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
 
 # FIXED: navigation.py only has 5 pages (indices 0-4).
 # Order was 0=Home, 1=Before Triage, 2=After Triage, 3=Dashboard, 4=About
-render_sidebar(3)
+render_sidebar(5)
 
 BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 
