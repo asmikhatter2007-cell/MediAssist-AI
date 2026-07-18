@@ -20,7 +20,7 @@ BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 # TODO: move this to an environment variable before final submission -
 # a hardcoded password in a public GitHub repo is visible to anyone.
 # e.g. STAFF_PASSWORD = os.environ.get("STAFF_PASSWORD", "staff123")
-STAFF_PASSWORD = "staff123"
+STAFF_PASSWORD = os.getenv("STAFF_PASSWORD")
 
 # Theme Styles Injector
 st.markdown("""
