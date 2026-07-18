@@ -10,11 +10,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from navigation import render_sidebar
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
-render_sidebar(5)
+
+# FIXED: navigation.py only has 5 pages (indices 0-4).
+# Order was 0=Home, 1=Before Triage, 2=After Triage, 3=Dashboard, 4=About
+render_sidebar(3)
 
 BASE_URL = "https://mediassist-ai-68lg.onrender.com"
 
-# CHANGE THIS before submission / demo - different from Admin's password
+# TODO: move this to an environment variable before final submission -
+# a hardcoded password in a public GitHub repo is visible to anyone.
+# e.g. STAFF_PASSWORD = os.environ.get("STAFF_PASSWORD", "staff123")
 STAFF_PASSWORD = "staff123"
 
 # Theme Styles Injector
@@ -60,11 +65,7 @@ div[class*="st-key-card_"]{
 .metric-header { font-size: 13px; font-weight: 600; color: #9BA3C7; margin-bottom: 3px; }
 .metric-value { font-size: 26px; font-weight: 800; color: #EEF1FB; }
 
-/* --- UPDATED: Full-Width Gradient Buttons with Extra Bold Font Targets --- */
 .stButton>button{
-    width:100%; border-radius:16px; height:52px;
-    background: linear-gradient(90deg, #2DD4BF 0%, #818CF8 50%, #F472B6 100%);
-    background-size: 200% auto; color:#0C1024; font-size:17px; font-weight:800; border:none;
     width:100% !important; border-radius:16px !important; height:58px !important;
     background: linear-gradient(90deg, #2DD4BF 0%, #818CF8 50%, #F472B6 100%) !important;
     background-size: 200% auto !important; color:#0C1024 !important; font-size:19px !important; font-weight:800 !important; border:none !important;
@@ -86,44 +87,33 @@ st.caption("Real-Time Hospital Resource Analytics")
 
 # ---------------- LOGIN GATE ----------------
 if "staff_authenticated" not in st.session_state:
-st.session_state.staff_authenticated = False
+    st.session_state.staff_authenticated = False
 
 if not st.session_state.staff_authenticated:
-with st.container(border=True):
-st.subheader("🔑 Staff Login")
-password_input = st.text_input("Password", type="password")
-        if st.button("Login"):
-            if password_input == STAFF_PASSWORD:
-                st.session_state.staff_authenticated = True
-                st.rerun()
-            else:
-                st.error("Incorrect password.")
-        
+    with st.container(border=True):
+        st.subheader("🔑 Staff Login")
+        password_input = st.text_input("Password", type="password")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        
-        # 1. Create columns to center the button nicely inside the card
+
+        # Center the login button inside the card
         _, btn_col, _ = st.columns([1.5, 1, 1.5])
-        
         with btn_col:
-            # 2. Place the button inside the middle column
             if st.button("Login", type="primary", use_container_width=True):
                 if password_input == STAFF_PASSWORD:
                     st.session_state.staff_authenticated = True
                     st.rerun()
                 else:
                     st.error("Incorrect password.")
-st.stop()
+    st.stop()
 
 col_a, col_b = st.columns([5, 1])
 with col_a:
-st.success("Logged in as Staff")
+    st.success("Logged in as Staff")
 with col_b:
-    if st.button("Logout"):
-    # --- FIXED: Added primary color layout and container width stretching ---
     if st.button("Logout", type="primary", use_container_width=True):
-st.session_state.staff_authenticated = False
-st.rerun()
+        st.session_state.staff_authenticated = False
+        st.rerun()
 
 
 # ---------------- CARD HELPERS ----------------
@@ -224,16 +214,16 @@ elif data is not None:
     # ---------------- METRIC CARDS (row 1) ----------------
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        with st.container(border=True,key="card_patients"):
+        with st.container(border=True, key="card_patients"):
             st.markdown(metric_card("🧑‍🤝‍🧑", "Patients in ED", admin_data["current_patients_ed"], "#2DD4BF"), unsafe_allow_html=True)
     with c2:
-        with st.container(border=True,key="card_beds"):
+        with st.container(border=True, key="card_beds"):
             st.markdown(metric_card("🛏️", "Beds Available", admin_data["beds_available"], "#818CF8"), unsafe_allow_html=True)
     with c3:
-        with st.container(border=True,key="card_boarding"):
+        with st.container(border=True, key="card_boarding"):
             st.markdown(metric_card("🚪", "Boarding in ED", admin_data["patients_boarding_ed"], "#FBBF6E"), unsafe_allow_html=True)
     with c4:
-        with st.container(border=True,key="card_avgboard"):
+        with st.container(border=True, key="card_avgboard"):
             st.markdown(metric_card("⏱️", "Boarding Hrs", admin_data["avg_boarding_hours"], "#F472B6"), unsafe_allow_html=True)
 
     st.write("")
@@ -241,16 +231,16 @@ elif data is not None:
     # ---------------- METRIC CARDS (row 2) ----------------
     c5, c6, c7, c8 = st.columns(4)
     with c5:
-        with st.container(border=True,key="card_doctor"):
+        with st.container(border=True, key="card_doctor"):
             st.markdown(metric_card("🩺", "Total Doctors", admin_data["total_doctors"], "#2DD4BF"), unsafe_allow_html=True)
     with c6:
-        with st.container(border=True,key="card_nurse"):
+        with st.container(border=True, key="card_nurse"):
             st.markdown(metric_card("👩‍⚕️", "Total Nurses", admin_data["total_nurses"], "#818CF8"), unsafe_allow_html=True)
     with c7:
-        with st.container(border=True,key="card_lab"):
+        with st.container(border=True, key="card_lab"):
             st.markdown(metric_card("🧪", "Pending Labs", admin_data["pending_lab_orders"], "#FBBF6E"), unsafe_allow_html=True)
     with c8:
-        with st.container(border=True,key="card_image"):
+        with st.container(border=True, key="card_image"):
             st.markdown(metric_card("🩻", "Pending Imaging", admin_data["pending_imaging_orders"], "#F472B6"), unsafe_allow_html=True)
 
     st.write("")
@@ -296,4 +286,3 @@ elif data is not None:
             styled_donut(orders_df, "Type", "Pending", {
                 "Lab Orders": "#FBBF24", "Imaging Orders": "#FB7185"
             }, "Pending Orders Split", key="orders_donut")
-# (The rest of your styled donut helpers, bar graphs, and backend data calls remain EXACTLY the same down below!)
